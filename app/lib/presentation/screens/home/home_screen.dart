@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/constants/app_constants.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../../data/models/group_model.dart';
 import '../../providers/app_providers.dart';
 import '../../widgets/group_card.dart';
@@ -21,19 +22,51 @@ class HomeScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('NameDrill'),
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    AppTheme.primaryColor,
+                    AppTheme.primaryColor.withOpacity(0.8),
+                  ],
+                ),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Icon(
+                Icons.school,
+                color: Colors.white,
+                size: 18,
+              ),
+            ),
+            const SizedBox(width: 10),
+            const Text('NameDrill'),
+          ],
+        ),
+        centerTitle: false,
         actions: [
           Semantics(
             label: 'Settings',
             button: true,
             child: IconButton(
-              icon: const Icon(Icons.settings_outlined),
+              icon: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Icon(Icons.settings_outlined, size: 20),
+              ),
               onPressed: () => Navigator.push(
                 context,
                 MaterialPageRoute(builder: (_) => const SettingsScreen()),
               ),
             ),
           ),
+          const SizedBox(width: 8),
         ],
       ),
       body: groupsAsync.when(
@@ -77,7 +110,7 @@ class HomeScreen extends ConsumerWidget {
       return const EmptyState(
         icon: Icons.people_outline,
         title: 'No groups yet',
-        message: 'Create your first group to start learning names',
+        message: 'Create your first group to start learning names.\nPerfect for teachers, coaches, and team leaders!',
       );
     }
 
@@ -88,7 +121,7 @@ class HomeScreen extends ConsumerWidget {
           // Stats summary
           const SliverToBoxAdapter(
             child: Padding(
-              padding: EdgeInsets.all(16),
+              padding: EdgeInsets.fromLTRB(16, 8, 16, 16),
               child: StatsSummary(),
             ),
           ),
@@ -96,28 +129,51 @@ class HomeScreen extends ConsumerWidget {
           // Groups header
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    'Your Groups',
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(6),
+                        decoration: BoxDecoration(
+                          color: AppTheme.primaryColor.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(8),
                         ),
+                        child: Icon(
+                          Icons.folder_outlined,
+                          size: 16,
+                          color: AppTheme.primaryColor,
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Text(
+                        'Your Groups',
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                      ),
+                    ],
                   ),
-                  Text(
-                    '${groups.length}${isPremium ? '' : '/${AppConstants.maxFreeGroups}'}',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Theme.of(context).colorScheme.outline,
-                        ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      '${groups.length}${isPremium ? '' : '/${AppConstants.maxFreeGroups}'}',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: Theme.of(context).colorScheme.outline,
+                            fontWeight: FontWeight.w600,
+                          ),
+                    ),
                   ),
                 ],
               ),
             ),
           ),
-
-          const SliverToBoxAdapter(child: SizedBox(height: 8)),
 
           // Groups list
           SliverPadding(

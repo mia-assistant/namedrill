@@ -12,6 +12,11 @@ class AppTheme {
   static const Color errorColor = Color(0xFFEF4444);
   static const Color warningColor = Color(0xFFF59E0B);
 
+  // Background tints for warmth
+  static const Color lightBackground = Color(0xFFFAFAFC); // Subtle cool gray-blue
+  static const Color lightSurface = Colors.white;
+  static const Color lightCardBackground = Colors.white;
+
   // Group colors (for user selection)
   static const List<Color> groupColors = [
     Color(0xFF6366F1), // Indigo
@@ -36,12 +41,13 @@ class AppTheme {
         primary: primaryColor,
         secondary: secondaryColor,
         tertiary: accentColor,
-        surface: Colors.white,
+        surface: lightSurface,
         error: errorColor,
       ),
+      scaffoldBackgroundColor: lightBackground,
       textTheme: GoogleFonts.interTextTheme(ThemeData.light().textTheme),
       appBarTheme: AppBarTheme(
-        backgroundColor: Colors.white,
+        backgroundColor: lightBackground,
         foregroundColor: Colors.grey[900],
         elevation: 0,
         centerTitle: true,
@@ -53,6 +59,7 @@ class AppTheme {
       ),
       cardTheme: CardTheme(
         elevation: 0,
+        color: lightCardBackground,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
           side: BorderSide(color: Colors.grey[200]!),
@@ -117,10 +124,13 @@ class AppTheme {
         ),
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       ),
-      floatingActionButtonTheme: const FloatingActionButtonThemeData(
+      floatingActionButtonTheme: FloatingActionButtonThemeData(
         backgroundColor: primaryColor,
         foregroundColor: Colors.white,
-        elevation: 4,
+        elevation: 3,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
       ),
       bottomNavigationBarTheme: BottomNavigationBarThemeData(
         backgroundColor: Colors.white,
@@ -234,10 +244,13 @@ class AppTheme {
         ),
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       ),
-      floatingActionButtonTheme: const FloatingActionButtonThemeData(
+      floatingActionButtonTheme: FloatingActionButtonThemeData(
         backgroundColor: primaryColor,
         foregroundColor: Colors.white,
-        elevation: 4,
+        elevation: 3,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
       ),
       bottomNavigationBarTheme: BottomNavigationBarThemeData(
         backgroundColor: const Color(0xFF1E1E1E),
