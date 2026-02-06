@@ -1,0 +1,123 @@
+appId: com.namedrill.namedrill
+---
+# NameDrill - Learn Mode Basic Test
+# 
+# SIMPLIFIED TEST: Just verifies Learn Mode works end-to-end
+# Uses TEST_MODE which auto-seeds data and skips onboarding
+#
+# Note: Flutter Semantics can hide text from accessibility tree,
+# so we use the Semantics labels where possible.
+#
+# Build with: ~/flutter/bin/flutter build apk --debug --dart-define=TEST_MODE=true
+# Then: ~/.maestro/bin/maestro test maestro/learn_mode_basic.yaml
+
+- launchApp:
+    clearState: true
+
+# ==========================================
+# Home Screen - TEST_MODE skips onboarding and seeds data
+# ==========================================
+
+- extendedWaitUntil:
+    visible: "NameDrill"
+    timeout: 20000
+
+# Wait for test data
+- extendedWaitUntil:
+    visible: "Test Group"
+    timeout: 15000
+
+# Navigate to the test group
+- tapOn:
+    text: "Test Group"
+    index: 0
+
+# ==========================================
+# Group Detail Screen
+# ==========================================
+
+- extendedWaitUntil:
+    visible: "Learn"
+    timeout: 10000
+
+# Start Learn Mode
+- tapOn: "Learn"
+
+# ==========================================
+# Learn Mode Screen - Flashcard Interaction
+# ==========================================
+
+# Wait for progress counter (e.g., "1 / 10") which indicates Learn Mode loaded
+- extendedWaitUntil:
+    visible:
+      text: "\\d+ / \\d+"
+    timeout: 15000
+
+# Tap the flashcard to reveal (using center of screen where the card is)
+# Card spans roughly middle of screen
+- tapOn:
+    point: "50%, 50%"
+
+# Wait for reveal - "Got It" button should appear
+- extendedWaitUntil:
+    visible: "Got It"
+    timeout: 10000
+
+# Verify "Forgot" is also visible
+- assertVisible: "Forgot"
+
+# Test "Got It" button - marks card as known
+- tapOn: "Got It"
+
+# ==========================================
+# Card 2 - Verify we advanced to card 2
+# ==========================================
+
+# Wait for card 2 progress counter
+- extendedWaitUntil:
+    visible:
+      text: "2 / \\d+"
+    timeout: 10000
+
+# Reveal card 2 by tapping center
+- tapOn:
+    point: "50%, 50%"
+
+- extendedWaitUntil:
+    visible: "Forgot"
+    timeout: 10000
+
+# Test "Forgot" button
+- tapOn: "Forgot"
+
+# ==========================================
+# Card 3 - Exit via close button
+# ==========================================
+
+# Wait for card 3
+- extendedWaitUntil:
+    visible:
+      text: "3 / \\d+"
+    timeout: 10000
+
+# Tap close button (X) in top right corner of app bar
+- tapOn:
+    point: "93%, 6%"
+
+# Should show exit confirmation dialog "End Session?"
+- extendedWaitUntil:
+    visible: "End Session?"
+    timeout: 5000
+
+- tapOn: "End"
+
+# ==========================================
+# Back to Group Detail
+# ==========================================
+
+- extendedWaitUntil:
+    visible: "Learn"
+    timeout: 10000
+
+# Verify we're back at group detail
+- assertVisible: "Test Group"
