@@ -27,6 +27,22 @@ class TestDataSeeder {
     'Jack Anderson',
   ];
 
+  /// Extended list of names for multiple groups
+  static final List<String> _moreNames = [
+    'Kevin Lee',
+    'Laura Chen',
+    'Michael Park',
+    'Nina Garcia',
+    'Oscar Martinez',
+    'Patricia Kim',
+    'Quinn Adams',
+    'Rachel Scott',
+    'Samuel Wright',
+    'Tina Nguyen',
+    'Victor Lopez',
+    'Wendy Clark',
+  ];
+
   static final List<Color> _avatarColors = [
     Colors.red,
     Colors.blue,
@@ -38,6 +54,13 @@ class TestDataSeeder {
     Colors.indigo,
     Colors.amber,
     Colors.cyan,
+  ];
+
+  /// Group configurations for screenshot mode
+  static final List<Map<String, dynamic>> _screenshotGroups = [
+    {'name': 'Period 1 - History', 'color': '#6366F1', 'count': 10},
+    {'name': 'AP Chemistry', 'color': '#10B981', 'count': 8},
+    {'name': 'Homeroom 204', 'color': '#F59E0B', 'count': 6},
   ];
 
   /// Seeds a test group with the specified number of people.
@@ -168,5 +191,90 @@ class TestDataSeeder {
     await db.delete(DatabaseHelper.tableGroups);
     await db.delete(DatabaseHelper.tableLearningRecords);
     await db.delete(DatabaseHelper.tableQuizScores);
+  }
+
+  /// Seeds multiple groups for screenshot capture mode.
+  /// Creates visually appealing data for store listings.
+  static Future<void> seedScreenshotData() async {
+    await clearAllData();
+    
+    final allNames = [..._testNames, ..._moreNames];
+    int nameIndex = 0;
+    
+    for (final groupConfig in _screenshotGroups) {
+      final groupName = groupConfig['name'] as String;
+      final groupColor = groupConfig['color'] as String;
+      final count = groupConfig['count'] as int;
+      
+      // Get names for this group
+      final groupNames = <String>[];
+      for (int i = 0; i < count && nameIndex < allNames.length; i++) {
+        groupNames.add(allNames[nameIndex]);
+        nameIndex++;
+      }
+      
+      await seedTestGroupWithColor(
+        groupName: groupName,
+        color: groupColor,
+        names: groupNames,
+      );
+    }
+  }
+
+  /// Seeds a test group with specific color and names.
+  static Future<GroupModel> seedTestGroupWithColor({
+    required String groupName,
+    required String color,
+    required List<String> names,
+  }) async {
+    final dbHelper = DatabaseHelper.instance;
+    final db = await dbHelper.database;
+    
+    // Create group
+    final groupId = _uuid.v4();
+    final now = DateTime.now();
+    final group = GroupModel(
+      id: groupId,
+      name: groupName,
+      color: color,
+      createdAt: now,
+      updatedAt: now,
+    );
+    
+    await db.insert(DatabaseHelper.tableGroups, group.toMap());
+    
+    // Create people with generated avatar images
+    final directory = await getApplicationDocumentsDirectory();
+    final photosDir = Directory(p.join(directory.path, 'photos'));
+    if (!await photosDir.exists()) {
+      await photosDir.create(recursive: true);
+    }
+    
+    for (int i = 0; i < names.length; i++) {
+      final personId = _uuid.v4();
+      final name = names[i];
+      final photoPath = p.join(photosDir.path, '$personId.png');
+      
+      // Generate a simple colored avatar
+      await _generateAvatarImage(
+        photoPath, 
+        name, 
+        _avatarColors[i % _avatarColors.length],
+      );
+      
+      final person = PersonModel(
+        id: personId,
+        groupId: groupId,
+        name: name,
+        photoPath: photoPath,
+        notes: '',
+        createdAt: now,
+        updatedAt: now,
+      );
+      
+      await db.insert(DatabaseHelper.tablePeople, person.toMap());
+    }
+    
+    return group;
   }
 }

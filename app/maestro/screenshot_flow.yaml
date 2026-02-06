@@ -1,0 +1,288 @@
+appId: com.namedrill.namedrill
+---
+# NameDrill - Screenshot Capture Flow
+# 
+# Captures screenshots for App Store / Play Store
+# Uses SCREENSHOT_MODE which seeds multiple groups and skips onboarding
+#
+# Build with: ~/flutter/bin/flutter build apk --debug --dart-define=SCREENSHOT_MODE=true
+# Run with: ~/.maestro/bin/maestro test maestro/screenshot_flow.yaml
+#
+# Note: We use clearState: false because the app seeds data on startup in SCREENSHOT_MODE.
+# If the data is wrong, uninstall the app first: adb uninstall com.namedrill.namedrill
+#
+# Screenshots saved to: ~/.maestro/tests/<timestamp>/ (default location)
+# Copy them to app/store_listing/screenshots/ after the run
+
+- launchApp:
+    clearState: false
+
+# ==========================================
+# SCREENSHOT 1: Home Screen with Stats & Multiple Groups
+# (Screenshot concept: Hero / Groups & Organization)
+# ==========================================
+
+- extendedWaitUntil:
+    visible: "NameDrill"
+    timeout: 20000
+
+# Wait for all groups to load
+- extendedWaitUntil:
+    visible: "Period 1 - History"
+    timeout: 15000
+
+# Wait for stats summary
+- extendedWaitUntil:
+    visible: "Stats Summary"
+    timeout: 5000
+
+- takeScreenshot: 01_home_with_groups
+
+# ==========================================
+# SCREENSHOT 2: Group Detail with People Grid
+# ==========================================
+
+- tapOn:
+    text: "Period 1 - History"
+    index: 0
+
+- extendedWaitUntil:
+    visible: "Learn"
+    timeout: 10000
+
+# Wait for people grid to load
+- extendedWaitUntil:
+    visible: "People"
+    timeout: 10000
+
+- takeScreenshot: 02_group_detail_with_people
+
+# ==========================================
+# SCREENSHOT 3: Learn Mode - Card Front
+# The card randomly shows face→name or name→face
+# We'll capture whatever state it shows first
+# ==========================================
+
+- tapOn: "Learn"
+
+# Wait for learn mode to load with first card
+- extendedWaitUntil:
+    visible:
+      text: "1 / \\d+"
+    timeout: 15000
+
+# Small delay to let UI settle
+- extendedWaitUntil:
+    visible: "Flashcard"
+    timeout: 8000
+
+- takeScreenshot: 03_learn_mode_card_front
+
+# ==========================================
+# SCREENSHOT 4: Learn Mode - Card Revealed (Name shown)
+# ==========================================
+
+- tapOn:
+    point: "50%, 50%"
+
+- extendedWaitUntil:
+    visible: "Got It"
+    timeout: 10000
+
+- takeScreenshot: 04_learn_mode_card_revealed
+
+# ==========================================
+# Complete some cards to get learn session complete screen
+# ==========================================
+
+# Card 1 done
+- tapOn: "Got It"
+
+# Card 2
+- extendedWaitUntil:
+    visible:
+      text: "2 / \\d+"
+    timeout: 8000
+- tapOn:
+    point: "50%, 50%"
+- extendedWaitUntil:
+    visible: "Forgot"
+    timeout: 8000
+- tapOn: "Forgot"
+
+# Card 3
+- extendedWaitUntil:
+    visible:
+      text: "3 / \\d+"
+    timeout: 8000
+- tapOn:
+    point: "50%, 50%"
+- extendedWaitUntil:
+    visible: "Got It"
+    timeout: 8000
+- tapOn: "Got It"
+
+# Card 4
+- extendedWaitUntil:
+    visible:
+      text: "4 / \\d+"
+    timeout: 8000
+- tapOn:
+    point: "50%, 50%"
+- extendedWaitUntil:
+    visible: "Got It"
+    timeout: 8000
+- tapOn: "Got It"
+
+# Card 5
+- extendedWaitUntil:
+    visible:
+      text: "5 / \\d+"
+    timeout: 8000
+- tapOn:
+    point: "50%, 50%"
+- extendedWaitUntil:
+    visible: "Forgot"
+    timeout: 8000
+- tapOn: "Forgot"
+
+# Card 6
+- extendedWaitUntil:
+    visible:
+      text: "6 / \\d+"
+    timeout: 8000
+- tapOn:
+    point: "50%, 50%"
+- extendedWaitUntil:
+    visible: "Got It"
+    timeout: 8000
+- tapOn: "Got It"
+
+# Card 7
+- extendedWaitUntil:
+    visible:
+      text: "7 / \\d+"
+    timeout: 8000
+- tapOn:
+    point: "50%, 50%"
+- extendedWaitUntil:
+    visible: "Got It"
+    timeout: 8000
+- tapOn: "Got It"
+
+# Card 8
+- extendedWaitUntil:
+    visible:
+      text: "8 / \\d+"
+    timeout: 8000
+- tapOn:
+    point: "50%, 50%"
+- extendedWaitUntil:
+    visible: "Got It"
+    timeout: 8000
+- tapOn: "Got It"
+
+# Card 9
+- extendedWaitUntil:
+    visible:
+      text: "9 / \\d+"
+    timeout: 8000
+- tapOn:
+    point: "50%, 50%"
+- extendedWaitUntil:
+    visible: "Got It"
+    timeout: 8000
+- tapOn: "Got It"
+
+# Card 10
+- extendedWaitUntil:
+    visible:
+      text: "10 / 10"
+    timeout: 8000
+- tapOn:
+    point: "50%, 50%"
+- extendedWaitUntil:
+    visible: "Got It"
+    timeout: 8000
+- tapOn: "Got It"
+
+# ==========================================
+# SCREENSHOT 5: Progress / Session Complete
+# ==========================================
+
+- extendedWaitUntil:
+    visible: "Session Complete"
+    timeout: 10000
+
+- takeScreenshot: 05_progress_session_complete
+
+# Return to group detail
+- tapOn: "Done"
+
+- extendedWaitUntil:
+    visible: "Period 1 - History"
+    timeout: 10000
+
+# ==========================================
+# SCREENSHOT 6: Quiz Mode
+# ==========================================
+
+- tapOn: "Quiz"
+
+# Wait for quiz to load
+- extendedWaitUntil:
+    visible: "Quiz Photo"
+    timeout: 15000
+
+# Answer a couple questions to get a score
+- tapOn:
+    text: "Answer option.*"
+
+- extendedWaitUntil:
+    visible: "Quiz Photo"
+    timeout: 5000
+
+- tapOn:
+    text: "Answer option.*"
+
+- extendedWaitUntil:
+    visible: "Quiz Photo"
+    timeout: 5000
+
+- takeScreenshot: 06_quiz_mode
+
+# Navigate back - don't wait for full 60 seconds
+- back
+
+# Confirm leaving quiz if dialog appears
+- tapOn:
+    text: "End"
+    optional: true
+
+# ==========================================
+# SCREENSHOT 7: Settings Screen
+# ==========================================
+
+# Navigate back to home
+- extendedWaitUntil:
+    visible: "Period 1 - History"
+    timeout: 10000
+
+- back
+
+- extendedWaitUntil:
+    visible: "NameDrill"
+    timeout: 10000
+
+# Tap settings button
+- tapOn: "Settings"
+
+- extendedWaitUntil:
+    visible: "Appearance"
+    timeout: 10000
+
+- takeScreenshot: 07_settings
+
+# ==========================================
+# Done - Screenshots captured!
+# ==========================================

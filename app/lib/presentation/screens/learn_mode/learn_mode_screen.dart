@@ -116,9 +116,13 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen> {
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 24),
-                ElevatedButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: const Text('Done'),
+                Semantics(
+                  label: 'All caught up Done button',
+                  button: true,
+                  child: ElevatedButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text('Done'),
+                  ),
                 ),
               ],
             ),
@@ -154,11 +158,15 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen> {
           
           // Card area
           Expanded(
-            child: GestureDetector(
-              onTap: () => setState(() => _isRevealed = true),
-              child: Padding(
-                padding: const EdgeInsets.all(24),
-                child: _buildCard(currentCard),
+            child: Semantics(
+              label: 'Flashcard',
+              button: true,
+              child: GestureDetector(
+                onTap: () => setState(() => _isRevealed = true),
+                child: Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: _buildCard(currentCard),
+                ),
               ),
             ),
           ),
@@ -170,35 +178,46 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen> {
                 ? Row(
                     children: [
                       Expanded(
-                        child: OutlinedButton(
-                          onPressed: () => _answer(false),
-                          style: OutlinedButton.styleFrom(
-                            foregroundColor: Colors.red,
-                            side: const BorderSide(color: Colors.red),
-                            padding: const EdgeInsets.symmetric(vertical: 16),
+                        child: Semantics(
+                          label: 'Forgot',
+                          button: true,
+                          child: OutlinedButton(
+                            onPressed: () => _answer(false),
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: Colors.red,
+                              side: const BorderSide(color: Colors.red),
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                            ),
+                            child: const Text('Forgot'),
                           ),
-                          child: const Text('Forgot'),
                         ),
                       ),
                       const SizedBox(width: 16),
                       Expanded(
-                        child: ElevatedButton(
-                          onPressed: () => _answer(true),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.green,
-                            padding: const EdgeInsets.symmetric(vertical: 16),
+                        child: Semantics(
+                          label: 'Got It',
+                          button: true,
+                          child: ElevatedButton(
+                            onPressed: () => _answer(true),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.green,
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                            ),
+                            child: const Text('Got It'),
                           ),
-                          child: const Text('Got It'),
                         ),
                       ),
                     ],
                   )
-                : Center(
-                    child: Text(
-                      'Tap card to reveal',
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: Theme.of(context).colorScheme.outline,
-                          ),
+                : Semantics(
+                    label: 'Tap card to reveal',
+                    child: Center(
+                      child: Text(
+                        'Tap card to reveal',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              color: Theme.of(context).colorScheme.outline,
+                            ),
+                      ),
                     ),
                   ),
           ),
@@ -327,7 +346,7 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen> {
     final accuracy = _totalReviewed > 0 ? (_correctCount / _totalReviewed * 100).round() : 0;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Session Complete')),
+      appBar: AppBar(title: Semantics(label: 'Session Complete Title', child: const Text('Session Complete'))),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(24),
@@ -383,9 +402,13 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen> {
               
               SizedBox(
                 width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: const Text('Done'),
+                child: Semantics(
+                  label: 'Done',
+                  button: true,
+                  child: ElevatedButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text('Done'),
+                  ),
                 ),
               ),
             ],

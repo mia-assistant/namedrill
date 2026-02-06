@@ -23,11 +23,15 @@ class HomeScreen extends ConsumerWidget {
       appBar: AppBar(
         title: const Text('NameDrill'),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.settings_outlined),
-            onPressed: () => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => const SettingsScreen()),
+          Semantics(
+            label: 'Settings',
+            button: true,
+            child: IconButton(
+              icon: const Icon(Icons.settings_outlined),
+              onPressed: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const SettingsScreen()),
+              ),
             ),
           ),
         ],

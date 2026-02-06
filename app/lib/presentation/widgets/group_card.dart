@@ -102,32 +102,36 @@ class GroupCard extends ConsumerWidget {
                       )
                     : SizedBox(
                         height: 60,
-                        child: Row(
-                          children: [
-                            ...people.take(6).map((person) => Padding(
-                                  padding: const EdgeInsets.only(right: 8),
-                                  child: ClipRRect(
-                                    borderRadius: BorderRadius.circular(8),
-                                    child: SizedBox(
-                                      width: 60,
-                                      height: 60,
-                                      child: Image.file(
-                                        File(person.photoPath),
-                                        fit: BoxFit.cover,
-                                        errorBuilder: (_, __, ___) => Container(
-                                          color: Theme.of(context)
-                                              .colorScheme
-                                              .surfaceContainerHighest,
-                                          child: Icon(
-                                            Icons.person,
-                                            color: Theme.of(context).colorScheme.outline,
-                                          ),
-                                        ),
+                        child: ListView.builder(
+                          scrollDirection: Axis.horizontal,
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: people.length > 4 ? 4 : people.length,
+                          itemBuilder: (context, index) {
+                            final person = people[index];
+                            return Padding(
+                              padding: const EdgeInsets.only(right: 8),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(8),
+                                child: SizedBox(
+                                  width: 60,
+                                  height: 60,
+                                  child: Image.file(
+                                    File(person.photoPath),
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (_, __, ___) => Container(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .surfaceContainerHighest,
+                                      child: Icon(
+                                        Icons.person,
+                                        color: Theme.of(context).colorScheme.outline,
                                       ),
                                     ),
                                   ),
-                                )),
-                          ],
+                                ),
+                              ),
+                            );
+                          },
                         ),
                       ),
               ),

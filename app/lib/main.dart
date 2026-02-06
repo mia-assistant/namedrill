@@ -22,6 +22,10 @@ const bool kScreenshotMode = bool.fromEnvironment('SCREENSHOT_MODE', defaultValu
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
+  debugPrint('=== APP STARTUP ===');
+  debugPrint('kTestMode: $kTestMode');
+  debugPrint('kScreenshotMode: $kScreenshotMode');
+  
   // Set preferred orientations
   await SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
