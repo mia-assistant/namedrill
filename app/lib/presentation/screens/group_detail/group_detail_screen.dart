@@ -98,17 +98,7 @@ class GroupDetailScreen extends ConsumerWidget {
         ],
       ),
       body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              groupColor.withOpacity(0.15),
-              Theme.of(context).scaffoldBackgroundColor,
-            ],
-            stops: const [0.0, 0.35],
-          ),
-        ),
+        color: Theme.of(context).scaffoldBackgroundColor,
         child: peopleAsync.when(
           loading: () => const Center(child: CircularProgressIndicator()),
           error: (error, _) => Center(child: Text('Error: $error')),
@@ -152,171 +142,137 @@ class GroupDetailScreen extends ConsumerWidget {
     }
 
     return SafeArea(
-      child: CustomScrollView(
-        slivers: [
-          // Stats card
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-              child: _buildStatsCard(context, statsAsync, people.length),
-            ),
-          ),
-
-          // Action buttons
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Semantics(
-                      label: 'Learn',
-                      button: true,
-                      child: _buildActionButton(
-                        context: context,
+      child: Column(
+        children: [
+          // Fixed header section
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+            child: Column(
+              children: [
+                // Stats card
+                _buildStatsCard(context, statsAsync, people.length),
+                const SizedBox(height: 16),
+                
+                // Action buttons
+                Row(
+                  children: [
+                    Expanded(
+                      child: Semantics(
                         label: 'Learn',
-                        icon: Icons.school,
-                        isPrimary: true,
-                        onPressed: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => LearnModeScreen(group: group),
+                        button: true,
+                        child: _buildActionButton(
+                          context: context,
+                          label: 'Learn',
+                          icon: Icons.school,
+                          isPrimary: true,
+                          onPressed: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => LearnModeScreen(group: group),
+                            ),
                           ),
                         ),
                       ),
                     ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Semantics(
-                      label: 'Quiz',
-                      button: true,
-                      child: _buildActionButton(
-                        context: context,
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Semantics(
                         label: 'Quiz',
-                        icon: Icons.quiz,
-                        isPrimary: false,
-                        onPressed: people.length >= AppConstants.minPeopleForQuiz
-                            ? () => Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) => QuizModeScreen(group: group),
-                                  ),
-                                )
-                            : null,
+                        button: true,
+                        child: _buildActionButton(
+                          context: context,
+                          label: 'Quiz',
+                          icon: Icons.quiz,
+                          isPrimary: false,
+                          onPressed: people.length >= AppConstants.minPeopleForQuiz
+                              ? () => Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => QuizModeScreen(group: group),
+                                    ),
+                                  )
+                              : null,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                
+                // Disabled quiz message
+                if (people.length < AppConstants.minPeopleForQuiz)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 12),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                      decoration: BoxDecoration(
+                        color: groupColor.withOpacity(0.08),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.info_outline,
+                            size: 16,
+                            color: groupColor,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Add ${AppConstants.minPeopleForQuiz - people.length} more to unlock Quiz',
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                  color: groupColor,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
-                ],
-              ),
-            ),
-          ),
-
-          // Disabled quiz message
-          if (people.length < AppConstants.minPeopleForQuiz)
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                  decoration: BoxDecoration(
-                    color: groupColor.withOpacity(0.08),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
+                
+                // Section header
+                Padding(
+                  padding: const EdgeInsets.only(top: 20, bottom: 12),
                   child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Icon(
-                        Icons.info_outline,
-                        size: 16,
-                        color: groupColor,
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        'Add ${AppConstants.minPeopleForQuiz - people.length} more to unlock Quiz',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: groupColor,
-                              fontWeight: FontWeight.w500,
-                            ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-
-          // Section header
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 20, 16, 12),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(6),
-                        decoration: BoxDecoration(
-                          color: groupColor.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Icon(
-                          Icons.people_outline,
-                          size: 16,
-                          color: groupColor,
-                        ),
-                      ),
-                      const SizedBox(width: 10),
                       Text(
                         'People',
                         style: Theme.of(context).textTheme.titleMedium?.copyWith(
                               fontWeight: FontWeight.bold,
                             ),
                       ),
+                      Text(
+                        '${people.length}',
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                              color: Theme.of(context).colorScheme.outline,
+                              fontWeight: FontWeight.w500,
+                            ),
+                      ),
                     ],
                   ),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(
-                      '${people.length}',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Theme.of(context).colorScheme.outline,
-                            fontWeight: FontWeight.w600,
-                          ),
-                    ),
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
-
-          // People grid
-          SliverPadding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            sliver: SliverGrid(
+          
+          // Scrollable people grid
+          Expanded(
+            child: GridView.builder(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 100),
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 3,
-                crossAxisSpacing: 12,
-                mainAxisSpacing: 12,
-                childAspectRatio: 0.75,
+                crossAxisSpacing: 16,
+                mainAxisSpacing: 20,
+                childAspectRatio: 0.8,
               ),
-              delegate: SliverChildBuilderDelegate(
-                (context, index) {
-                  final person = people[index];
-                  return _buildPersonCard(context, ref, person);
-                },
-                childCount: people.length,
-              ),
+              itemCount: people.length,
+              itemBuilder: (context, index) {
+                final person = people[index];
+                return _buildPersonCard(context, ref, person);
+              },
             ),
           ),
-
-          // Bottom padding
-          const SliverToBoxAdapter(child: SizedBox(height: 100)),
         ],
       ),
     );
@@ -386,92 +342,54 @@ class GroupDetailScreen extends ConsumerWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     
     return Container(
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            groupColor.withOpacity(isDark ? 0.15 : 0.08),
+            groupColor.withOpacity(isDark ? 0.08 : 0.03),
+          ],
+        ),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: isDark ? Colors.grey[800]! : Colors.grey[200]!,
+          color: groupColor.withOpacity(0.15),
         ),
-        boxShadow: [
-          BoxShadow(
-            color: groupColor.withOpacity(0.08),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
       ),
-      child: Column(
-        children: [
-          // Accent bar
-          Container(
-            height: 4,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [groupColor, groupColor.withOpacity(0.7)],
-              ),
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(20),
-                topRight: Radius.circular(20),
-              ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(20),
-            child: statsAsync.when(
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error: (_, __) => const Text('Error loading stats'),
-              data: (stats) {
-                final learned = stats['learned'] as int;
-                final percent = stats['percentLearned'] as int;
+      child: statsAsync.when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (_, __) => const Text('Error loading stats'),
+        data: (stats) {
+          final learned = stats['learned'] as int;
+          final percent = stats['percentLearned'] as int;
 
-                return Column(
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: [
-                        _buildStatItem(context, '$totalPeople', 'Total', Icons.people),
-                        _buildStatItem(context, '$learned', 'Learned', Icons.check_circle),
-                        _buildStatItem(context, '$percent%', 'Progress', Icons.trending_up),
-                      ],
-                    ),
-                    const SizedBox(height: 20),
-                    // Progress bar with label
-                    Row(
-                      children: [
-                        Expanded(
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(6),
-                            child: LinearProgressIndicator(
-                              value: percent / 100,
-                              backgroundColor: groupColor.withOpacity(0.15),
-                              valueColor: AlwaysStoppedAnimation<Color>(groupColor),
-                              minHeight: 10,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                );
-              },
-            ),
-          ),
-        ],
+          return Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              _buildStatChip(context, '$totalPeople', 'Total', Icons.people, Colors.blue),
+              _buildStatChip(context, '$learned', 'Learned', Icons.check_circle, AppTheme.successColor),
+              _buildStatChip(context, '$percent%', 'Progress', Icons.trending_up, groupColor),
+            ],
+          );
+        },
       ),
     );
   }
 
-  Widget _buildStatItem(BuildContext context, String value, String label, IconData icon) {
+  Widget _buildStatChip(BuildContext context, String value, String label, IconData icon, Color color) {
     return Column(
+      mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(icon, size: 20, color: groupColor),
-        const SizedBox(height: 4),
+        Icon(icon, size: 24, color: color),
+        const SizedBox(height: 8),
         Text(
           value,
-          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                 fontWeight: FontWeight.bold,
               ),
         ),
+        const SizedBox(height: 2),
         Text(
           label,
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -495,35 +413,28 @@ class GroupDetailScreen extends ConsumerWidget {
           ),
         ),
       ).then((_) => ref.read(peopleNotifierProvider(group.id).notifier).loadPeople()),
-      child: Container(
-        decoration: BoxDecoration(
-          color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(
-            color: isDark ? Colors.grey[800]! : Colors.grey[200]!,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.04),
-              blurRadius: 6,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Column(
-          children: [
-            Expanded(
+      child: Column(
+        children: [
+          Expanded(
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.08),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
               child: ClipRRect(
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(13),
-                  topRight: Radius.circular(13),
-                ),
+                borderRadius: BorderRadius.circular(16),
                 child: Image.file(
                   File(person.photoPath),
                   fit: BoxFit.cover,
                   width: double.infinity,
                   errorBuilder: (_, __, ___) => Container(
-                    color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                    color: isDark ? Colors.grey[800] : Colors.grey[200],
                     child: Icon(
                       Icons.person,
                       size: 40,
@@ -533,20 +444,18 @@ class GroupDetailScreen extends ConsumerWidget {
                 ),
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.all(8),
-              child: Text(
-                person.name,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                textAlign: TextAlign.center,
-              ),
-            ),
-          ],
-        ),
+          ),
+          const SizedBox(height: 10),
+          Text(
+            person.name,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.center,
+          ),
+        ],
       ),
     );
   }

@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/theme/app_theme.dart';
 import '../../data/models/group_model.dart';
 import '../providers/app_providers.dart';
 
@@ -34,170 +35,97 @@ class GroupCard extends ConsumerWidget {
     return Semantics(
       label: group.name,
       button: true,
-      child: GestureDetector(
-        onTap: () {
-          debugPrint('GroupCard tapped: ${group.name}');
-          onTap();
-        },
-        behavior: HitTestBehavior.opaque,
-        child: Container(
-          decoration: BoxDecoration(
-            color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(
-              color: isDark ? Colors.grey[800]! : Colors.grey[200]!,
-              width: 1,
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(CardStyles.borderRadius),
+        child: InkWell(
+          onTap: () {
+            debugPrint('GroupCard tapped: ${group.name}');
+            onTap();
+          },
+          borderRadius: BorderRadius.circular(CardStyles.borderRadius),
+          child: Container(
+            padding: const EdgeInsets.all(Spacing.cardPadding),
+            decoration: BoxDecoration(
+              color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
+              borderRadius: BorderRadius.circular(CardStyles.borderRadius),
+              border: Border.all(
+                color: isDark ? Colors.grey[800]! : Colors.grey[200]!,
+                width: 1,
+              ),
+              boxShadow: CardStyles.softShadow(groupColor),
             ),
-            boxShadow: [
-              BoxShadow(
-                color: groupColor.withOpacity(0.08),
-                blurRadius: 12,
-                offset: const Offset(0, 4),
-              ),
-              BoxShadow(
-                color: Colors.black.withOpacity(0.04),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Colored accent bar at top
-              Container(
-                height: 4,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      groupColor,
-                      groupColor.withOpacity(0.7),
-                    ],
-                  ),
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(20),
-                    topRight: Radius.circular(20),
-                  ),
-                ),
-              ),
-              
-              Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Header with name and chevron
+                Row(
                   children: [
-                    // Header with name
-                    Row(
-                      children: [
-                        // Colored dot with subtle glow
-                        Container(
-                          width: 14,
-                          height: 14,
-                          decoration: BoxDecoration(
-                            color: groupColor,
-                            shape: BoxShape.circle,
-                            boxShadow: [
-                              BoxShadow(
-                                color: groupColor.withOpacity(0.4),
-                                blurRadius: 6,
-                                spreadRadius: 1,
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Text(
-                            group.name,
-                            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                  fontWeight: FontWeight.w600,
-                                ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                        Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: groupColor.withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: Icon(
-                            Icons.chevron_right,
-                            size: 18,
-                            color: groupColor,
-                          ),
-                        ),
-                      ],
+                    // Colored dot indicator
+                    Container(
+                      width: 12,
+                      height: 12,
+                      decoration: BoxDecoration(
+                        color: groupColor,
+                        shape: BoxShape.circle,
+                      ),
                     ),
-
-                    const SizedBox(height: 16),
-
-                    // Photo grid preview
-                    previewPeopleAsync.when(
-                      loading: () => _buildEmptyPhotosPlaceholder(context),
-                      error: (_, __) => _buildEmptyPhotosPlaceholder(context),
-                      data: (people) => people.isEmpty
-                          ? _buildEmptyPhotosPlaceholder(context)
-                          : _buildPhotoGrid(context, people),
+                    const SizedBox(width: Spacing.md),
+                    Expanded(
+                      child: Text(
+                        group.name,
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
-
-                    const SizedBox(height: 16),
-
-                    // Stats row
-                    Row(
-                      children: [
-                        // Person count chip
-                        personCountAsync.when(
-                          loading: () => const SizedBox(),
-                          error: (_, __) => const SizedBox(),
-                          data: (count) => Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 10,
-                              vertical: 6,
-                            ),
-                            decoration: BoxDecoration(
-                              color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(
-                                  Icons.people_outline,
-                                  size: 14,
-                                  color: Theme.of(context).colorScheme.outline,
-                                ),
-                                const SizedBox(width: 4),
-                                Text(
-                                  '$count ${count == 1 ? 'person' : 'people'}',
-                                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                                        color: Theme.of(context).colorScheme.outline,
-                                        fontWeight: FontWeight.w500,
-                                      ),
-                                ),
-                              ],
-                            ),
-                          ),
+                    // Person count inline
+                    personCountAsync.when(
+                      loading: () => const SizedBox(),
+                      error: (_, __) => const SizedBox(),
+                      data: (count) => Text(
+                        '$count',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: Theme.of(context).colorScheme.outline,
+                          fontWeight: FontWeight.w500,
                         ),
-
-                        const Spacer(),
-
-                        // Progress indicator
-                        groupStatsAsync.when(
-                          loading: () => const SizedBox(),
-                          error: (_, __) => const SizedBox(),
-                          data: (stats) {
-                            final percent = stats['percentLearned'] as int;
-                            return _buildProgressIndicator(context, percent);
-                          },
-                        ),
-                      ],
+                      ),
+                    ),
+                    const SizedBox(width: Spacing.xs),
+                    Icon(
+                      Icons.chevron_right,
+                      size: 20,
+                      color: Theme.of(context).colorScheme.outline,
                     ),
                   ],
                 ),
-              ),
-            ],
+
+                const SizedBox(height: Spacing.lg),
+
+                // Photo grid preview
+                previewPeopleAsync.when(
+                  loading: () => _buildEmptyPhotosPlaceholder(context),
+                  error: (_, __) => _buildEmptyPhotosPlaceholder(context),
+                  data: (people) => people.isEmpty
+                      ? _buildEmptyPhotosPlaceholder(context)
+                      : _buildPhotoGrid(context, people),
+                ),
+
+                const SizedBox(height: Spacing.lg),
+
+                // Progress bar at bottom
+                groupStatsAsync.when(
+                  loading: () => _buildProgressBar(context, 0),
+                  error: (_, __) => _buildProgressBar(context, 0),
+                  data: (stats) {
+                    final percent = stats['percentLearned'] as int;
+                    return _buildProgressBar(context, percent);
+                  },
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -205,15 +133,13 @@ class GroupCard extends ConsumerWidget {
   }
 
   Widget _buildEmptyPhotosPlaceholder(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
     return Container(
-      height: 64,
+      height: 72,
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.5),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: Theme.of(context).colorScheme.outline.withOpacity(0.1),
-          width: 1,
-        ),
+        color: isDark ? Colors.grey[850] : Colors.grey[50],
+        borderRadius: BorderRadius.circular(CardStyles.smallBorderRadius),
       ),
       child: Center(
         child: Row(
@@ -221,15 +147,15 @@ class GroupCard extends ConsumerWidget {
           children: [
             Icon(
               Icons.add_photo_alternate_outlined,
-              size: 20,
-              color: Theme.of(context).colorScheme.outline.withOpacity(0.6),
+              size: 22,
+              color: Theme.of(context).colorScheme.outline.withOpacity(0.5),
             ),
-            const SizedBox(width: 8),
+            const SizedBox(width: Spacing.sm),
             Text(
               'Add people to get started',
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.outline.withOpacity(0.6),
-                  ),
+                color: Theme.of(context).colorScheme.outline.withOpacity(0.6),
+              ),
             ),
           ],
         ),
@@ -239,7 +165,7 @@ class GroupCard extends ConsumerWidget {
 
   Widget _buildPhotoGrid(BuildContext context, List people) {
     return SizedBox(
-      height: 64,
+      height: 72,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         physics: const NeverScrollableScrollPhysics(),
@@ -249,22 +175,22 @@ class GroupCard extends ConsumerWidget {
           final isLast = index == 3 && people.length > 4;
           
           return Padding(
-            padding: EdgeInsets.only(right: index < 3 ? 8 : 0),
+            padding: EdgeInsets.only(right: index < 3 ? Spacing.sm : 0),
             child: Container(
-              width: 64,
-              height: 64,
+              width: 72,
+              height: 72,
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(14),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.08),
-                    blurRadius: 4,
+                    color: Colors.black.withOpacity(0.06),
+                    blurRadius: 6,
                     offset: const Offset(0, 2),
                   ),
                 ],
               ),
               child: ClipRRect(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(14),
                 child: Stack(
                   fit: StackFit.expand,
                   children: [
@@ -281,14 +207,14 @@ class GroupCard extends ConsumerWidget {
                     ),
                     if (isLast && people.length > 4)
                       Container(
-                        color: Colors.black.withOpacity(0.5),
+                        color: Colors.black.withOpacity(0.45),
                         child: Center(
                           child: Text(
                             '+${people.length - 4}',
                             style: const TextStyle(
                               color: Colors.white,
                               fontWeight: FontWeight.bold,
-                              fontSize: 16,
+                              fontSize: 18,
                             ),
                           ),
                         ),
@@ -303,47 +229,44 @@ class GroupCard extends ConsumerWidget {
     );
   }
 
-  Widget _buildProgressIndicator(BuildContext context, int percent) {
+  Widget _buildProgressBar(BuildContext context, int percent) {
     final progressColor = percent >= 80
-        ? const Color(0xFF22C55E)
+        ? AppTheme.successColor
         : percent >= 50
-            ? const Color(0xFFF59E0B)
+            ? AppTheme.warningColor
             : groupColor;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Row(
-      mainAxisSize: MainAxisSize.min,
       children: [
-        // Circular progress
-        SizedBox(
-          width: 32,
-          height: 32,
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              CircularProgressIndicator(
-                value: percent / 100,
-                strokeWidth: 3,
-                backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
-                valueColor: AlwaysStoppedAnimation<Color>(progressColor),
+        // Progress bar
+        Expanded(
+          child: Container(
+            height: 8,
+            decoration: BoxDecoration(
+              color: isDark ? Colors.grey[800] : Colors.grey[100],
+              borderRadius: BorderRadius.circular(4),
+            ),
+            child: FractionallySizedBox(
+              widthFactor: percent / 100,
+              alignment: Alignment.centerLeft,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: progressColor,
+                  borderRadius: BorderRadius.circular(4),
+                ),
               ),
-              Text(
-                '$percent',
-                style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: progressColor,
-                      fontSize: 10,
-                    ),
-              ),
-            ],
+            ),
           ),
         ),
-        const SizedBox(width: 6),
+        const SizedBox(width: Spacing.md),
+        // Percent label
         Text(
-          '%',
-          style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                fontWeight: FontWeight.w600,
-                color: progressColor,
-              ),
+          '$percent%',
+          style: Theme.of(context).textTheme.titleSmall?.copyWith(
+            color: progressColor,
+            fontWeight: FontWeight.bold,
+          ),
         ),
       ],
     );

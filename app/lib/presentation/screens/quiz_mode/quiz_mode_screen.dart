@@ -213,78 +213,70 @@ class _QuizModeScreenState extends ConsumerState<QuizModeScreen> {
           ),
         ],
       ),
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              groupColor.withOpacity(0.2),
-              Theme.of(context).scaffoldBackgroundColor,
-            ],
-            stops: const [0.0, 0.4],
-          ),
-        ),
-        child: SafeArea(
-          child: Column(
-            children: [
-              // Timer progress bar
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(4),
-                  child: LinearProgressIndicator(
-                    value: _timeRemaining / AppConstants.quizDurationSeconds,
-                    backgroundColor: groupColor.withOpacity(0.2),
-                    valueColor: AlwaysStoppedAnimation<Color>(
-                      _timeRemaining <= 10 ? AppTheme.errorColor : groupColor,
-                    ),
-                    minHeight: 6,
+      body: SafeArea(
+        child: Column(
+          children: [
+            // Timer progress bar
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(4),
+                child: LinearProgressIndicator(
+                  value: _timeRemaining / AppConstants.quizDurationSeconds,
+                  backgroundColor: groupColor.withOpacity(0.2),
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    _timeRemaining <= 10 ? AppTheme.errorColor : groupColor,
                   ),
+                  minHeight: 6,
                 ),
               ),
+            ),
+            
+            const SizedBox(height: Spacing.md),
 
-              // Photo card
-              Expanded(
-                child: Semantics(
-                  label: 'Quiz Photo',
-                  image: true,
-                  child: Padding(
-                    padding: const EdgeInsets.all(24),
-                    child: _buildPhotoCard(),
-                  ),
-                ),
-              ),
-
-              // Options
-              Semantics(
-                label: 'Quiz Options',
-                container: true,
+            // Photo card - slightly larger
+            Expanded(
+              flex: 5,
+              child: Semantics(
+                label: 'Quiz Photo',
+                image: true,
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
-                  child: Column(
-                    children: [
-                      Row(
-                        children: [
-                          Expanded(child: _buildOptionButton(_options[0])),
-                          const SizedBox(width: 12),
-                          Expanded(child: _buildOptionButton(_options[1])),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
-                      Row(
-                        children: [
-                          Expanded(child: _buildOptionButton(_options[2])),
-                          const SizedBox(width: 12),
-                          Expanded(child: _buildOptionButton(_options[3])),
-                        ],
-                      ),
-                    ],
-                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  child: _buildPhotoCard(),
                 ),
               ),
-            ],
-          ),
+            ),
+            
+            const SizedBox(height: Spacing.md),
+
+            // Options - adjusted height
+            Semantics(
+              label: 'Quiz Options',
+              container: true,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+                child: Column(
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(child: _buildOptionButton(_options[0])),
+                        const SizedBox(width: 12),
+                        Expanded(child: _buildOptionButton(_options[1])),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        Expanded(child: _buildOptionButton(_options[2])),
+                        const SizedBox(width: 12),
+                        Expanded(child: _buildOptionButton(_options[3])),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -320,56 +312,32 @@ class _QuizModeScreenState extends ConsumerState<QuizModeScreen> {
     return Container(
       decoration: BoxDecoration(
         color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: [
-          BoxShadow(
-            color: groupColor.withOpacity(0.2),
-            blurRadius: 24,
-            offset: const Offset(0, 10),
-          ),
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        borderRadius: BorderRadius.circular(CardStyles.borderRadius),
+        border: Border.all(
+          color: isDark ? Colors.grey[800]! : Colors.grey[200]!,
+        ),
+        boxShadow: CardStyles.softShadow(groupColor),
       ),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(24),
-        child: Column(
-          children: [
-            // Colored accent bar
-            Container(
-              height: 6,
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [groupColor, groupColor.withOpacity(0.7)],
+        borderRadius: BorderRadius.circular(CardStyles.borderRadius),
+        child: Padding(
+          padding: const EdgeInsets.all(Spacing.md),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(CardStyles.smallBorderRadius),
+            child: Image.file(
+              File(_currentPerson!.photoPath),
+              fit: BoxFit.cover,
+              width: double.infinity,
+              errorBuilder: (_, __, ___) => Container(
+                color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                child: Icon(
+                  Icons.person,
+                  size: 80,
+                  color: Theme.of(context).colorScheme.outline,
                 ),
               ),
             ),
-            // Photo
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.all(12),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(16),
-                  child: Image.file(
-                    File(_currentPerson!.photoPath),
-                    fit: BoxFit.cover,
-                    width: double.infinity,
-                    errorBuilder: (_, __, ___) => Container(
-                      color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                      child: Icon(
-                        Icons.person,
-                        size: 80,
-                        color: Theme.of(context).colorScheme.outline,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );
@@ -442,34 +410,28 @@ class _QuizModeScreenState extends ConsumerState<QuizModeScreen> {
       label: 'Answer option $name',
       button: true,
       child: SizedBox(
-        height: 60,
+        height: 56,
         child: Material(
           color: backgroundColor ?? (isDark ? const Color(0xFF1E1E1E) : Colors.white),
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(CardStyles.smallBorderRadius),
           child: InkWell(
             onTap: _showingResult ? null : () => _selectAnswer(name),
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(CardStyles.smallBorderRadius),
             child: Container(
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(14),
+                borderRadius: BorderRadius.circular(CardStyles.smallBorderRadius),
                 border: Border.all(
                   color: borderColor ?? 
-                      (isDark ? Colors.grey[700]! : Colors.grey[300]!),
+                      (isDark ? Colors.grey[700]! : Colors.grey[200]!),
                   width: _showingResult ? 2 : 1,
                 ),
                 boxShadow: _showingResult
                     ? null
-                    : [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.04),
-                          blurRadius: 4,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
+                    : CardStyles.defaultShadow,
               ),
               child: Center(
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  padding: const EdgeInsets.symmetric(horizontal: Spacing.lg),
                   child: Text(
                     name,
                     style: TextStyle(
@@ -494,52 +456,40 @@ class _QuizModeScreenState extends ConsumerState<QuizModeScreen> {
     final isNewHighScore = _highScore != null && _score == _highScore && _score > 0;
 
     return Scaffold(
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              (isNewHighScore ? Colors.amber : groupColor).withOpacity(0.2),
-              Theme.of(context).scaffoldBackgroundColor,
-            ],
-            stops: const [0.0, 0.5],
-          ),
-        ),
-        child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                // Trophy or check icon
-                Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    Container(
-                      width: 110,
-                      height: 110,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: (isNewHighScore ? Colors.amber : groupColor).withOpacity(0.1),
-                      ),
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // Trophy or check icon
+              Stack(
+                alignment: Alignment.center,
+                children: [
+                  Container(
+                    width: 110,
+                    height: 110,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: (isNewHighScore ? Colors.amber : groupColor).withOpacity(0.08),
                     ),
-                    Container(
-                      width: 85,
-                      height: 85,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: (isNewHighScore ? Colors.amber : groupColor).withOpacity(0.15),
-                      ),
+                  ),
+                  Container(
+                    width: 85,
+                    height: 85,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: (isNewHighScore ? Colors.amber : groupColor).withOpacity(0.12),
                     ),
-                    Icon(
-                      isNewHighScore ? Icons.emoji_events : Icons.check_circle,
-                      size: 50,
-                      color: isNewHighScore ? Colors.amber : groupColor,
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 24),
+                  ),
+                  Icon(
+                    isNewHighScore ? Icons.emoji_events : Icons.check_circle,
+                    size: 50,
+                    color: isNewHighScore ? Colors.amber : groupColor,
+                  ),
+                ],
+              ),
+              const SizedBox(height: 24),
                 
                 if (isNewHighScore) ...[
                   Semantics(
@@ -670,31 +620,24 @@ class _QuizModeScreenState extends ConsumerState<QuizModeScreen> {
             ),
           ),
         ),
-      ),
-    );
+      );
   }
 
   Widget _buildStatCard(String value, String label, IconData icon, Color color) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal: Spacing.lg, vertical: Spacing.md),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(CardStyles.smallBorderRadius),
         border: Border.all(
           color: Theme.of(context).colorScheme.outline.withOpacity(0.1),
         ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        boxShadow: CardStyles.defaultShadow,
       ),
       child: Column(
         children: [
           Icon(icon, size: 22, color: color),
-          const SizedBox(height: 4),
+          const SizedBox(height: Spacing.xs),
           Text(
             value,
             style: Theme.of(context).textTheme.titleLarge?.copyWith(

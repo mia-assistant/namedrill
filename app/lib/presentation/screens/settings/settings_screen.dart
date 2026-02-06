@@ -4,6 +4,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:file_picker/file_picker.dart';
 
 import '../../../core/constants/app_constants.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../../core/providers/purchase_providers.dart';
 import '../../../core/services/backup_service.dart';
 import '../../../data/models/settings_model.dart';
@@ -33,198 +34,399 @@ class SettingsScreen extends ConsumerWidget {
   Widget _buildContent(BuildContext context, WidgetRef ref, SettingsModel settings, PurchaseState purchaseState) {
     // Use RevenueCat premium status as primary source, fall back to local settings
     final isPremium = purchaseState.isPremium || settings.isPremium;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     
     return ListView(
+      padding: const EdgeInsets.symmetric(horizontal: Spacing.screenPadding),
       children: [
         // Premium section
         if (!isPremium) ...[
-          _buildPremiumCard(context, ref, purchaseState),
-          const Divider(),
+          const SizedBox(height: Spacing.md),
+          _buildPremiumCard(context, ref, purchaseState, isDark),
+          const SizedBox(height: Spacing.lg),
+        ] else ...[
+          const SizedBox(height: Spacing.md),
         ],
 
         // Appearance section
         _buildSectionHeader(context, 'Appearance'),
-        ListTile(
-          leading: const Icon(Icons.dark_mode),
-          title: const Text('Dark Mode'),
-          subtitle: Text(_getDarkModeLabel(settings.darkMode)),
-          trailing: const Icon(Icons.chevron_right),
-          onTap: () => _showDarkModeDialog(context, ref, settings),
+        const SizedBox(height: Spacing.sm),
+        _buildSectionCard(
+          context,
+          isDark,
+          children: [
+            _buildSettingsTile(
+              context: context,
+              icon: Icons.dark_mode,
+              title: 'Dark Mode',
+              subtitle: _getDarkModeLabel(settings.darkMode),
+              onTap: () => _showDarkModeDialog(context, ref, settings),
+            ),
+          ],
         ),
 
-        const Divider(),
+        const SizedBox(height: Spacing.lg),
 
         // Learning section
         _buildSectionHeader(context, 'Learning'),
-        ListTile(
-          leading: const Icon(Icons.format_list_numbered),
-          title: const Text('Cards per Session'),
-          subtitle: Text('${settings.sessionCardCount} cards'),
-          trailing: const Icon(Icons.chevron_right),
-          onTap: () => _showSessionSizeDialog(context, ref, settings),
+        const SizedBox(height: Spacing.sm),
+        _buildSectionCard(
+          context,
+          isDark,
+          children: [
+            _buildSettingsTile(
+              context: context,
+              icon: Icons.format_list_numbered,
+              title: 'Cards per Session',
+              subtitle: '${settings.sessionCardCount} cards',
+              onTap: () => _showSessionSizeDialog(context, ref, settings),
+            ),
+          ],
         ),
 
-        const Divider(),
+        const SizedBox(height: Spacing.lg),
 
         // Notifications section
         _buildSectionHeader(context, 'Notifications'),
-        SwitchListTile(
-          secondary: const Icon(Icons.notifications_outlined),
-          title: const Text('Daily Reminders'),
-          subtitle: settings.notificationsEnabled
-              ? Text('${settings.notificationHour.toString().padLeft(2, '0')}:${settings.notificationMinute.toString().padLeft(2, '0')}')
-              : const Text('Off'),
-          value: settings.notificationsEnabled,
-          onChanged: (value) async {
-            await ref.read(settingsProvider.notifier).setNotifications(value);
-          },
-        ),
-        if (settings.notificationsEnabled)
-          ListTile(
-            leading: const SizedBox(width: 24),
-            title: const Text('Reminder Time'),
-            subtitle: Text(
-              '${settings.notificationHour.toString().padLeft(2, '0')}:${settings.notificationMinute.toString().padLeft(2, '0')}',
+        const SizedBox(height: Spacing.sm),
+        _buildSectionCard(
+          context,
+          isDark,
+          children: [
+            _buildSwitchTile(
+              context: context,
+              icon: Icons.notifications,
+              title: 'Daily Reminders',
+              subtitle: settings.notificationsEnabled
+                  ? '${settings.notificationHour.toString().padLeft(2, '0')}:${settings.notificationMinute.toString().padLeft(2, '0')}'
+                  : 'Off',
+              value: settings.notificationsEnabled,
+              onChanged: (value) async {
+                await ref.read(settingsProvider.notifier).setNotifications(value);
+              },
             ),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () => _showTimePickerDialog(context, ref, settings),
-          ),
+            if (settings.notificationsEnabled) ...[
+              Divider(
+                height: 1,
+                indent: 56,
+                color: isDark ? Colors.grey[800] : Colors.grey[200],
+              ),
+              _buildSettingsTile(
+                context: context,
+                icon: Icons.access_time,
+                title: 'Reminder Time',
+                subtitle: '${settings.notificationHour.toString().padLeft(2, '0')}:${settings.notificationMinute.toString().padLeft(2, '0')}',
+                onTap: () => _showTimePickerDialog(context, ref, settings),
+              ),
+            ],
+          ],
+        ),
 
-        const Divider(),
+        const SizedBox(height: Spacing.lg),
 
         // Data section
         _buildSectionHeader(context, 'Data'),
-        ListTile(
-          leading: const Icon(Icons.upload_outlined),
-          title: const Text('Export Data'),
-          subtitle: const Text('Save backup to device'),
-          trailing: const Icon(Icons.chevron_right),
-          onTap: () => _showExportDialog(context, ref),
-        ),
-        ListTile(
-          leading: const Icon(Icons.download_outlined),
-          title: const Text('Import Data'),
-          subtitle: const Text('Restore from backup'),
-          trailing: const Icon(Icons.chevron_right),
-          onTap: () => _showImportDialog(context, ref),
-        ),
-        ListTile(
-          leading: const Icon(Icons.refresh),
-          title: const Text('Reset Progress'),
-          subtitle: const Text('Keep people, clear learning data'),
-          onTap: () => _showResetProgressDialog(context, ref),
-        ),
-        ListTile(
-          leading: const Icon(Icons.delete_forever, color: Colors.red),
-          title: const Text('Delete All Data', style: TextStyle(color: Colors.red)),
-          subtitle: const Text('Remove all groups, people, and progress'),
-          onTap: () => _showDeleteAllDialog(context, ref),
+        const SizedBox(height: Spacing.sm),
+        _buildSectionCard(
+          context,
+          isDark,
+          children: [
+            _buildSettingsTile(
+              context: context,
+              icon: Icons.upload,
+              title: 'Export Data',
+              subtitle: 'Save backup to device',
+              onTap: () => _showExportDialog(context, ref),
+            ),
+            Divider(
+              height: 1,
+              indent: 56,
+              color: isDark ? Colors.grey[800] : Colors.grey[200],
+            ),
+            _buildSettingsTile(
+              context: context,
+              icon: Icons.download,
+              title: 'Import Data',
+              subtitle: 'Restore from backup',
+              onTap: () => _showImportDialog(context, ref),
+            ),
+            Divider(
+              height: 1,
+              indent: 56,
+              color: isDark ? Colors.grey[800] : Colors.grey[200],
+            ),
+            _buildSettingsTile(
+              context: context,
+              icon: Icons.refresh,
+              title: 'Reset Progress',
+              subtitle: 'Keep people, clear learning data',
+              onTap: () => _showResetProgressDialog(context, ref),
+            ),
+            Divider(
+              height: 1,
+              indent: 56,
+              color: isDark ? Colors.grey[800] : Colors.grey[200],
+            ),
+            _buildSettingsTile(
+              context: context,
+              icon: Icons.delete_forever,
+              title: 'Delete All Data',
+              subtitle: 'Remove all groups, people, and progress',
+              isDestructive: true,
+              onTap: () => _showDeleteAllDialog(context, ref),
+            ),
+          ],
         ),
 
-        const Divider(),
+        const SizedBox(height: Spacing.lg),
 
         // About section
         _buildSectionHeader(context, 'About'),
-        ListTile(
-          leading: const Icon(Icons.info_outline),
-          title: const Text('Version'),
-          subtitle: const Text(AppConstants.appVersion),
-        ),
-        ListTile(
-          leading: const Icon(Icons.privacy_tip_outlined),
-          title: const Text('Privacy Policy'),
-          trailing: const Icon(Icons.open_in_new),
-          onTap: () => _openUrl('https://namedrill.app/privacy'),
-        ),
-        ListTile(
-          leading: const Icon(Icons.mail_outline),
-          title: const Text('Send Feedback'),
-          trailing: const Icon(Icons.open_in_new),
-          onTap: () => _openUrl('mailto:support@namedrill.app?subject=NameDrill%20Feedback'),
+        const SizedBox(height: Spacing.sm),
+        _buildSectionCard(
+          context,
+          isDark,
+          children: [
+            _buildSettingsTile(
+              context: context,
+              icon: Icons.info,
+              title: 'Version',
+              subtitle: AppConstants.appVersion,
+              showChevron: false,
+            ),
+            Divider(
+              height: 1,
+              indent: 56,
+              color: isDark ? Colors.grey[800] : Colors.grey[200],
+            ),
+            _buildSettingsTile(
+              context: context,
+              icon: Icons.privacy_tip,
+              title: 'Privacy Policy',
+              showExternalIcon: true,
+              onTap: () => _openUrl('https://namedrill.app/privacy'),
+            ),
+            Divider(
+              height: 1,
+              indent: 56,
+              color: isDark ? Colors.grey[800] : Colors.grey[200],
+            ),
+            _buildSettingsTile(
+              context: context,
+              icon: Icons.mail,
+              title: 'Send Feedback',
+              showExternalIcon: true,
+              onTap: () => _openUrl('mailto:support@namedrill.app?subject=NameDrill%20Feedback'),
+            ),
+          ],
         ),
 
-        const SizedBox(height: 32),
+        const SizedBox(height: Spacing.xxl),
       ],
     );
   }
 
   Widget _buildSectionHeader(BuildContext context, String title) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+      padding: const EdgeInsets.only(left: 4, top: Spacing.lg),
       child: Text(
-        title,
-        style: Theme.of(context).textTheme.labelLarge?.copyWith(
+        title.toUpperCase(),
+        style: Theme.of(context).textTheme.labelMedium?.copyWith(
               color: Theme.of(context).colorScheme.primary,
               fontWeight: FontWeight.bold,
+              letterSpacing: 0.8,
             ),
       ),
     );
   }
 
-  Widget _buildPremiumCard(BuildContext context, WidgetRef ref, PurchaseState purchaseState) {
+  Widget _buildSectionCard(BuildContext context, bool isDark, {required List<Widget> children}) {
+    return Container(
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
+        borderRadius: BorderRadius.circular(CardStyles.borderRadius),
+        border: Border.all(
+          color: isDark ? Colors.grey[800]! : Colors.grey[200]!,
+        ),
+        boxShadow: CardStyles.defaultShadow,
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(CardStyles.borderRadius),
+        child: Column(
+          children: children,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSettingsTile({
+    required BuildContext context,
+    required IconData icon,
+    required String title,
+    String? subtitle,
+    VoidCallback? onTap,
+    bool showChevron = true,
+    bool showExternalIcon = false,
+    bool isDestructive = false,
+  }) {
+    final color = isDestructive ? AppTheme.errorColor : null;
+    
+    return ListTile(
+      contentPadding: const EdgeInsets.symmetric(horizontal: Spacing.md, vertical: Spacing.xs),
+      leading: Container(
+        width: 40,
+        height: 40,
+        decoration: BoxDecoration(
+          color: (color ?? AppTheme.primaryColor).withOpacity(0.1),
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Icon(
+          icon,
+          color: color ?? AppTheme.primaryColor,
+          size: 20,
+        ),
+      ),
+      title: Text(
+        title,
+        style: TextStyle(
+          color: color,
+          fontWeight: FontWeight.w500,
+        ),
+      ),
+      subtitle: subtitle != null
+          ? Text(
+              subtitle,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: color?.withOpacity(0.7),
+                  ),
+            )
+          : null,
+      trailing: showExternalIcon
+          ? Icon(Icons.open_in_new, size: 18, color: Theme.of(context).colorScheme.outline)
+          : (showChevron && onTap != null)
+              ? Icon(Icons.chevron_right, color: Theme.of(context).colorScheme.outline)
+              : null,
+      onTap: onTap,
+    );
+  }
+
+  Widget _buildSwitchTile({
+    required BuildContext context,
+    required IconData icon,
+    required String title,
+    String? subtitle,
+    required bool value,
+    required ValueChanged<bool> onChanged,
+  }) {
+    return ListTile(
+      contentPadding: const EdgeInsets.symmetric(horizontal: Spacing.md, vertical: Spacing.xs),
+      leading: Container(
+        width: 40,
+        height: 40,
+        decoration: BoxDecoration(
+          color: AppTheme.primaryColor.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Icon(
+          icon,
+          color: AppTheme.primaryColor,
+          size: 20,
+        ),
+      ),
+      title: Text(
+        title,
+        style: const TextStyle(fontWeight: FontWeight.w500),
+      ),
+      subtitle: subtitle != null ? Text(subtitle, style: Theme.of(context).textTheme.bodySmall) : null,
+      trailing: Switch.adaptive(
+        value: value,
+        onChanged: onChanged,
+        activeColor: AppTheme.primaryColor,
+      ),
+    );
+  }
+
+  Widget _buildPremiumCard(BuildContext context, WidgetRef ref, PurchaseState purchaseState, bool isDark) {
     final isLoading = purchaseState.status == PurchaseStatus.loading;
     
-    return Card(
-      margin: const EdgeInsets.all(16),
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            AppTheme.primaryColor,
+            AppTheme.primaryColor.withBlue(255),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(CardStyles.borderRadius),
+        boxShadow: [
+          BoxShadow(
+            color: AppTheme.primaryColor.withOpacity(0.3),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
       child: Padding(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(Spacing.lg),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
                 Container(
-                  padding: const EdgeInsets.all(12),
+                  padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: Colors.amber.withOpacity(0.2),
-                    shape: BoxShape.circle,
+                    color: Colors.white.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                  child: const Icon(Icons.star, color: Colors.amber, size: 28),
+                  child: const Icon(Icons.star, color: Colors.amber, size: 24),
                 ),
-                const SizedBox(width: 16),
+                const SizedBox(width: Spacing.md),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
+                      const Text(
                         'Upgrade to Premium',
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                       Text(
-                        'Unlimited groups and people',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: Theme.of(context).colorScheme.outline,
-                            ),
+                        'Unlock unlimited potential',
+                        style: TextStyle(
+                          color: Colors.white.withOpacity(0.8),
+                          fontSize: 13,
+                        ),
                       ),
                     ],
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 20),
-            Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _buildFeatureRow(context, 'Unlimited groups', true),
-                      _buildFeatureRow(context, 'Unlimited people', true),
-                      _buildFeatureRow(context, 'Support indie dev ❤️', true),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 20),
+            const SizedBox(height: Spacing.lg),
+            _buildFeatureRow('Unlimited groups', true),
+            const SizedBox(height: Spacing.xs),
+            _buildFeatureRow('Unlimited people', true),
+            const SizedBox(height: Spacing.xs),
+            _buildFeatureRow('Support indie dev ❤️', true),
+            const SizedBox(height: Spacing.lg),
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: isLoading ? null : () => _handlePurchase(context, ref),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.amber,
-                  foregroundColor: Colors.black,
+                  backgroundColor: Colors.white,
+                  foregroundColor: AppTheme.primaryColor,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  elevation: 0,
                 ),
                 child: isLoading
                     ? const SizedBox(
@@ -232,16 +434,27 @@ class SettingsScreen extends ConsumerWidget {
                         height: 20,
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation<Color>(Colors.black),
+                          valueColor: AlwaysStoppedAnimation<Color>(AppTheme.primaryColor),
                         ),
                       )
-                    : Text('Unlock for ${purchaseState.priceString}'),
+                    : Text(
+                        'Unlock for ${purchaseState.priceString}',
+                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                      ),
               ),
             ),
-            const SizedBox(height: 8),
-            TextButton(
-              onPressed: isLoading ? null : () => _handleRestore(context, ref),
-              child: const Text('Restore Purchase'),
+            const SizedBox(height: Spacing.sm),
+            Center(
+              child: TextButton(
+                onPressed: isLoading ? null : () => _handleRestore(context, ref),
+                child: Text(
+                  'Restore Purchase',
+                  style: TextStyle(
+                    color: Colors.white.withOpacity(0.9),
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
             ),
           ],
         ),
@@ -249,20 +462,23 @@ class SettingsScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildFeatureRow(BuildContext context, String text, bool included) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 2),
-      child: Row(
-        children: [
-          Icon(
-            included ? Icons.check_circle : Icons.remove_circle_outline,
-            size: 16,
-            color: included ? Colors.green : Theme.of(context).colorScheme.outline,
+  Widget _buildFeatureRow(String text, bool included) {
+    return Row(
+      children: [
+        Icon(
+          Icons.check_circle,
+          size: 18,
+          color: Colors.white.withOpacity(0.9),
+        ),
+        const SizedBox(width: Spacing.sm),
+        Text(
+          text,
+          style: TextStyle(
+            color: Colors.white.withOpacity(0.95),
+            fontSize: 14,
           ),
-          const SizedBox(width: 8),
-          Text(text, style: Theme.of(context).textTheme.bodySmall),
-        ],
-      ),
+        ),
+      ],
     );
   }
 

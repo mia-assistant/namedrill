@@ -4,6 +4,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import '../../../core/constants/app_constants.dart';
+import '../../../core/theme/app_theme.dart';
+import '../../providers/app_providers.dart';
 import '../home/home_screen.dart';
 
 class OnboardingScreen extends ConsumerStatefulWidget {
@@ -16,6 +18,10 @@ class OnboardingScreen extends ConsumerStatefulWidget {
 class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   final PageController _pageController = PageController();
   int _currentPage = 0;
+  bool _remindersEnabled = false;
+  TimeOfDay _reminderTime = const TimeOfDay(hour: 9, minute: 0);
+  
+  final int _totalPages = 5; // Welcome, How it works, Camera, Reminders, Paywall
 
   @override
   void dispose() {
@@ -26,58 +32,131 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SafeArea(
-        child: Column(
-          children: [
-            Expanded(
-              child: PageView(
-                controller: _pageController,
-                onPageChanged: (index) => setState(() => _currentPage = index),
-                children: [
-                  _buildPage1(context),
-                  _buildPage2(context),
-                  _buildPage3(context),
-                ],
-              ),
+      body: Stack(
+        children: [
+          // Gradient background based on current page
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 400),
+            decoration: BoxDecoration(
+              gradient: _getGradientForPage(_currentPage),
             ),
-            _buildBottomSection(context),
-          ],
-        ),
+          ),
+          SafeArea(
+            child: Column(
+              children: [
+                Expanded(
+                  child: PageView(
+                    controller: _pageController,
+                    onPageChanged: (index) => setState(() => _currentPage = index),
+                    children: [
+                      _buildWelcomePage(context),
+                      _buildHowItWorksPage(context),
+                      _buildCameraPage(context),
+                      _buildRemindersPage(context),
+                      _buildPaywallPage(context),
+                    ],
+                  ),
+                ),
+                _buildBottomSection(context),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildPage1(BuildContext context) {
+  LinearGradient _getGradientForPage(int page) {
+    final gradients = [
+      // Welcome - Deep purple (good contrast)
+      const LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [Color(0xFF5B247A), Color(0xFF1BCEDF)],
+      ),
+      // How it works - Deep teal
+      const LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [Color(0xFF0F2027), Color(0xFF2C5364)],
+      ),
+      // Camera - Deep coral/magenta
+      const LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [Color(0xFF834d9b), Color(0xFFd04ed6)],
+      ),
+      // Reminders - Deep blue
+      const LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [Color(0xFF1a2980), Color(0xFF26d0ce)],
+      ),
+      // Paywall - Rich purple/gold
+      const LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [Color(0xFF4A00E0), Color(0xFF8E2DE2)],
+      ),
+    ];
+    return gradients[page.clamp(0, gradients.length - 1)];
+  }
+
+  Widget _buildWelcomePage(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(32),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Container(
-            padding: const EdgeInsets.all(32),
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.primaryContainer,
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              Icons.school,
-              size: 80,
-              color: Theme.of(context).colorScheme.primary,
-            ),
+          // Fun emoji stack
+          Stack(
+            alignment: Alignment.center,
+            children: [
+              Container(
+                width: 140,
+                height: 140,
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.2),
+                  shape: BoxShape.circle,
+                ),
+              ),
+              const Text(
+                '🧠',
+                style: TextStyle(fontSize: 80),
+              ),
+            ],
           ),
           const SizedBox(height: 48),
           Text(
-            'Never forget a\nstudent\'s name again',
-            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+            'Remember\nEvery Name',
+            style: Theme.of(context).textTheme.displaySmall?.copyWith(
                   fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                  height: 1.1,
                 ),
             textAlign: TextAlign.center,
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 20),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.2),
+              borderRadius: BorderRadius.circular(30),
+            ),
+            child: Text(
+              '👩‍🏫 Teachers  •  👔 Professionals  •  🎉 Social butterflies',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Colors.white,
+                  ),
+              textAlign: TextAlign.center,
+            ),
+          ),
+          const SizedBox(height: 24),
           Text(
-            'Build stronger connections with your class by remembering every name.',
+            'Build stronger connections by never\nforgetting a face (or name) again!',
             style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  color: Theme.of(context).colorScheme.outline,
+                  color: Colors.white.withOpacity(0.9),
+                  height: 1.5,
                 ),
             textAlign: TextAlign.center,
           ),
@@ -86,252 +165,545 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     );
   }
 
-  Widget _buildPage2(BuildContext context) {
+  Widget _buildHowItWorksPage(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(32),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
+          Text(
+            'Super Simple',
+            style: Theme.of(context).textTheme.displaySmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 40),
+          _buildStepCard(
+            context,
+            '📸',
+            'Snap Photos',
+            'Add photos of people you want to remember',
+          ),
+          const SizedBox(height: 16),
+          _buildStepCard(
+            context,
+            '🎯',
+            'Practice Daily',
+            'Fun flashcard games with smart repetition',
+          ),
+          const SizedBox(height: 16),
+          _buildStepCard(
+            context,
+            '🏆',
+            'Never Forget',
+            'Lock names into long-term memory',
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStepCard(BuildContext context, String emoji, String title, String subtitle) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.15),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Colors.white.withOpacity(0.2)),
+      ),
+      child: Row(
+        children: [
+          Text(emoji, style: const TextStyle(fontSize: 40)),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                ),
+                Text(
+                  subtitle,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: Colors.white.withOpacity(0.8),
+                      ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCameraPage(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(32),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Stack(
+            alignment: Alignment.center,
             children: [
-              _buildStepIcon(context, Icons.camera_alt, '1'),
-              _buildArrow(context),
-              _buildStepIcon(context, Icons.school, '2'),
-              _buildArrow(context),
-              _buildStepIcon(context, Icons.emoji_events, '3'),
+              Container(
+                width: 140,
+                height: 140,
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.2),
+                  shape: BoxShape.circle,
+                ),
+              ),
+              const Text(
+                '📷',
+                style: TextStyle(fontSize: 80),
+              ),
             ],
           ),
           const SizedBox(height: 48),
           Text(
-            'How it works',
-            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+            'Quick Setup',
+            style: Theme.of(context).textTheme.displaySmall?.copyWith(
                   fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 20),
+          Text(
+            'Take photos or import from your library.\nWe\'ll organize everything for you!',
+            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                  color: Colors.white.withOpacity(0.9),
+                  height: 1.5,
                 ),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 32),
-          _buildStep(context, '1', 'Add photos', 'Take or import photos of your students'),
-          const SizedBox(height: 16),
-          _buildStep(context, '2', 'Practice daily', 'Flashcard-style learning with spaced repetition'),
-          const SizedBox(height: 16),
-          _buildStep(context, '3', 'Remember forever', 'Build lasting memories with proven techniques'),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.15),
+              borderRadius: BorderRadius.circular(30),
+              border: Border.all(color: Colors.white.withOpacity(0.2)),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.lock, size: 18, color: Colors.white.withOpacity(0.9)),
+                const SizedBox(width: 8),
+                Text(
+                  'Photos stay on your device',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: Colors.white.withOpacity(0.9),
+                      ),
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildStepIcon(BuildContext context, IconData icon, String number) {
-    return Container(
-      width: 60,
-      height: 60,
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.primaryContainer,
-        shape: BoxShape.circle,
-      ),
-      child: Icon(
-        icon,
-        color: Theme.of(context).colorScheme.primary,
-        size: 28,
-      ),
-    );
-  }
-
-  Widget _buildArrow(BuildContext context) {
+  Widget _buildRemindersPage(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8),
-      child: Icon(
-        Icons.arrow_forward,
-        color: Theme.of(context).colorScheme.outline,
-      ),
-    );
-  }
-
-  Widget _buildStep(BuildContext context, String number, String title, String description) {
-    return Row(
-      children: [
-        Container(
-          width: 32,
-          height: 32,
-          decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.primary,
-            shape: BoxShape.circle,
-          ),
-          child: Center(
-            child: Text(
-              number,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.onPrimary,
-                    fontWeight: FontWeight.bold,
-                  ),
-            ),
-          ),
-        ),
-        const SizedBox(width: 16),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+      padding: const EdgeInsets.all(32),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Stack(
+            alignment: Alignment.center,
             children: [
-              Text(
-                title,
-                style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+              Container(
+                width: 140,
+                height: 140,
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.2),
+                  shape: BoxShape.circle,
+                ),
               ),
-              Text(
-                description,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Theme.of(context).colorScheme.outline,
-                    ),
+              const Text(
+                '⏰',
+                style: TextStyle(fontSize: 80),
               ),
             ],
           ),
+          const SizedBox(height: 48),
+          Text(
+            'Stay Consistent',
+            style: Theme.of(context).textTheme.displaySmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 20),
+          Text(
+            'A few minutes daily is all it takes.\nWe can remind you to practice!',
+            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                  color: Colors.white.withOpacity(0.9),
+                  height: 1.5,
+                ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 32),
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.15),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: Colors.white.withOpacity(0.2)),
+            ),
+            child: Column(
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Daily Reminders',
+                            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                          ),
+                          Text(
+                            'Get a gentle nudge to practice',
+                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                  color: Colors.white.withOpacity(0.8),
+                                ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Switch(
+                      value: _remindersEnabled,
+                      onChanged: (value) => setState(() => _remindersEnabled = value),
+                      activeColor: Colors.white,
+                      activeTrackColor: Colors.white.withOpacity(0.4),
+                    ),
+                  ],
+                ),
+                if (_remindersEnabled) ...[
+                  const SizedBox(height: 16),
+                  Divider(color: Colors.white.withOpacity(0.2)),
+                  const SizedBox(height: 12),
+                  InkWell(
+                    onTap: () async {
+                      final picked = await showTimePicker(
+                        context: context,
+                        initialTime: _reminderTime,
+                      );
+                      if (picked != null) {
+                        setState(() => _reminderTime = picked);
+                      }
+                    },
+                    child: Row(
+                      children: [
+                        Icon(Icons.access_time, color: Colors.white.withOpacity(0.9), size: 22),
+                        const SizedBox(width: 12),
+                        Text(
+                          'Reminder Time',
+                          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                color: Colors.white,
+                              ),
+                        ),
+                        const Spacer(),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.2),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Text(
+                            _reminderTime.format(context),
+                            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPaywallPage(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(32),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Stack(
+            alignment: Alignment.center,
+            children: [
+              Container(
+                width: 140,
+                height: 140,
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.2),
+                  shape: BoxShape.circle,
+                ),
+              ),
+              const Text(
+                '⭐',
+                style: TextStyle(fontSize: 80),
+              ),
+            ],
+          ),
+          const SizedBox(height: 32),
+          Text(
+            'Go Premium',
+            style: Theme.of(context).textTheme.displaySmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 12),
+          Text(
+            'One-time purchase, yours forever',
+            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                  color: Colors.white.withOpacity(0.8),
+                ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 28),
+          _buildFeatureRow(context, '✓', 'Unlimited groups'),
+          const SizedBox(height: 12),
+          _buildFeatureRow(context, '✓', 'Unlimited people per group'),
+          const SizedBox(height: 12),
+          _buildFeatureRow(context, '✓', 'Support indie development ❤️'),
+          const SizedBox(height: 32),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.15),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: Colors.white.withOpacity(0.3)),
+            ),
+            child: Column(
+              children: [
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      'Free:',
+                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                            color: Colors.white.withOpacity(0.9),
+                          ),
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      '1 group, 15 people',
+                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w600,
+                          ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFeatureRow(BuildContext context, String check, String text) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Text(
+          check,
+          style: const TextStyle(fontSize: 18, color: Colors.white),
+        ),
+        const SizedBox(width: 12),
+        Text(
+          text,
+          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                color: Colors.white,
+                fontWeight: FontWeight.w500,
+              ),
         ),
       ],
     );
   }
 
-  Widget _buildPage3(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(32),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(32),
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.primaryContainer,
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              Icons.camera_alt,
-              size: 80,
-              color: Theme.of(context).colorScheme.primary,
-            ),
-          ),
-          const SizedBox(height: 48),
-          Text(
-            'Enable Camera Access',
-            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 16),
-          Text(
-            'Take photos of your class roster to get started quickly. You can also import from your photo library.',
-            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  color: Theme.of(context).colorScheme.outline,
-                ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 32),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                Icons.lock,
-                size: 16,
-                color: Theme.of(context).colorScheme.outline,
-              ),
-              const SizedBox(width: 8),
-              Text(
-                'Photos never leave your device',
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Theme.of(context).colorScheme.outline,
-                    ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildBottomSection(BuildContext context) {
-    return Padding(
+    return Container(
       padding: const EdgeInsets.all(24),
       child: Column(
         children: [
           // Page indicators
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
-            children: List.generate(3, (index) {
+            children: List.generate(_totalPages, (index) {
               return Container(
                 margin: const EdgeInsets.symmetric(horizontal: 4),
                 width: _currentPage == index ? 24 : 8,
                 height: 8,
                 decoration: BoxDecoration(
                   color: _currentPage == index
-                      ? Theme.of(context).colorScheme.primary
-                      : Theme.of(context).colorScheme.surfaceContainerHighest,
+                      ? Colors.white
+                      : Colors.white.withOpacity(0.4),
                   borderRadius: BorderRadius.circular(4),
                 ),
               );
             }),
           ),
           const SizedBox(height: 24),
-          // Buttons
-          if (_currentPage < 2)
-            SizedBox(
-              width: double.infinity,
-              child: Semantics(
-                label: 'Continue',
-                button: true,
-                child: ElevatedButton(
-                  onPressed: () {
-                    _pageController.nextPage(
-                      duration: const Duration(milliseconds: 300),
-                      curve: Curves.easeInOut,
-                    );
-                  },
-                  child: const Text('Continue'),
-                ),
-              ),
-            )
+          // Buttons based on current page
+          if (_currentPage == 2) // Camera page
+            _buildCameraButtons(context)
+          else if (_currentPage == 4) // Paywall page
+            _buildPaywallButtons(context)
           else
-            Column(
-              children: [
-                SizedBox(
-                  width: double.infinity,
-                  child: Semantics(
-                    label: 'Enable Camera',
-                    button: true,
-                    child: ElevatedButton(
-                      onPressed: () => _requestPermissionAndContinue(true),
-                      child: const Text('Enable Camera'),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 12),
-                SizedBox(
-                  width: double.infinity,
-                  child: Semantics(
-                    label: 'Maybe Later',
-                    button: true,
-                    child: TextButton(
-                      onPressed: () => _completeOnboarding(),
-                      child: const Text('Maybe Later'),
-                    ),
-                  ),
-                ),
-              ],
-            ),
+            _buildContinueButton(context),
         ],
       ),
     );
   }
 
-  Future<void> _requestPermissionAndContinue(bool requestCamera) async {
-    if (requestCamera) {
-      await Permission.camera.request();
-    }
+  Widget _buildContinueButton(BuildContext context) {
+    return SizedBox(
+      width: double.infinity,
+      height: 56,
+      child: ElevatedButton(
+        onPressed: () {
+          _pageController.nextPage(
+            duration: const Duration(milliseconds: 400),
+            curve: Curves.easeInOut,
+          );
+        },
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.white,
+          foregroundColor: Colors.black87,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+        ),
+        child: const Text(
+          'Continue',
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCameraButtons(BuildContext context) {
+    return Column(
+      children: [
+        SizedBox(
+          width: double.infinity,
+          height: 56,
+          child: ElevatedButton(
+            onPressed: () async {
+              await Permission.camera.request();
+              _pageController.nextPage(
+                duration: const Duration(milliseconds: 400),
+                curve: Curves.easeInOut,
+              );
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.white,
+              foregroundColor: Colors.black87,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+            ),
+            child: const Text(
+              'Enable Camera',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+            ),
+          ),
+        ),
+        const SizedBox(height: 12),
+        TextButton(
+          onPressed: () {
+            _pageController.nextPage(
+              duration: const Duration(milliseconds: 400),
+              curve: Curves.easeInOut,
+            );
+          },
+          child: Text(
+            'Skip for now',
+            style: TextStyle(
+              color: Colors.white.withOpacity(0.9),
+              fontSize: 16,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPaywallButtons(BuildContext context) {
+    return Column(
+      children: [
+        SizedBox(
+          width: double.infinity,
+          height: 56,
+          child: ElevatedButton(
+            onPressed: () => _showPurchase(context),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.white,
+              foregroundColor: Colors.black87,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+            ),
+            child: const Text(
+              'Unlock Premium',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+            ),
+          ),
+        ),
+        const SizedBox(height: 12),
+        TextButton(
+          onPressed: () => _completeOnboarding(),
+          child: Text(
+            'Continue with free version',
+            style: TextStyle(
+              color: Colors.white.withOpacity(0.9),
+              fontSize: 16,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Future<void> _showPurchase(BuildContext context) async {
+    // TODO: Integrate with RevenueCat to show purchase
+    // For now, just complete onboarding
     await _completeOnboarding();
   }
 
   Future<void> _completeOnboarding() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(AppConstants.prefOnboardingComplete, true);
+    
+    // Save reminder preference
+    if (_remindersEnabled) {
+      // TODO: Schedule notifications
+    }
 
     if (mounted) {
       Navigator.of(context).pushReplacement(
