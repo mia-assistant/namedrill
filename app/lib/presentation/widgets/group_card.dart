@@ -30,10 +30,14 @@ class GroupCard extends ConsumerWidget {
     final previewPeopleAsync = ref.watch(previewPeopleProvider(group.id));
     final groupStatsAsync = ref.watch(groupStatsProvider(group.id));
 
-    return Card(
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: onTap,
+    return GestureDetector(
+      onTap: () {
+        debugPrint('GroupCard tapped: ${group.name}');
+        onTap();
+      },
+      behavior: HitTestBehavior.opaque,
+      child: Card(
+        clipBehavior: Clip.antiAlias,
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Column(

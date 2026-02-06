@@ -228,9 +228,10 @@ final isPremiumProvider = Provider<bool>((ref) {
   return settings.value?.isPremium ?? false;
 });
 
-// Group count
-final groupCountProvider = FutureProvider<int>((ref) async {
-  return ref.read(groupRepositoryProvider).getGroupCount();
+// Group count - watches groupsProvider to stay in sync
+final groupCountProvider = Provider<int>((ref) {
+  final groups = ref.watch(groupsProvider);
+  return groups.value?.length ?? 0;
 });
 
 // Total people count

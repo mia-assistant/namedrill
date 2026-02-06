@@ -10,7 +10,6 @@ class StatsSummary extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final userStatsAsync = ref.watch(userStatsProvider);
     final totalPeopleAsync = ref.watch(totalPeopleCountProvider);
-    final groupCountAsync = ref.watch(groupCountProvider);
 
     return Card(
       child: Padding(
@@ -39,15 +38,11 @@ class StatsSummary extends ConsumerWidget {
             ),
 
             // Groups
-            groupCountAsync.when(
-              loading: () => _buildStatItem(context, '...', 'Groups', Icons.folder_outlined),
-              error: (_, __) => _buildStatItem(context, '0', 'Groups', Icons.folder_outlined),
-              data: (count) => _buildStatItem(
-                context,
-                count.toString(),
-                'Groups',
-                Icons.folder_outlined,
-              ),
+            _buildStatItem(
+              context,
+              ref.watch(groupCountProvider).toString(),
+              'Groups',
+              Icons.folder_outlined,
             ),
 
             // Divider

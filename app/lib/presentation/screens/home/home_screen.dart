@@ -144,7 +144,7 @@ class HomeScreen extends ConsumerWidget {
   }
 
   void _showCreateGroupDialog(BuildContext context, WidgetRef ref) async {
-    final groupCount = await ref.read(groupCountProvider.future);
+    final groupCount = ref.read(groupCountProvider);
     final isPremium = ref.read(isPremiumProvider);
 
     if (!isPremium && groupCount >= AppConstants.maxFreeGroups) {
