@@ -92,14 +92,14 @@ class SettingsScreen extends ConsumerWidget {
           title: const Text('Export Data'),
           subtitle: const Text('Save backup to device'),
           trailing: const Icon(Icons.chevron_right),
-          onTap: () => _showExportDialog(context),
+          onTap: () => _showExportDialog(context, ref),
         ),
         ListTile(
           leading: const Icon(Icons.download_outlined),
           title: const Text('Import Data'),
           subtitle: const Text('Restore from backup'),
           trailing: const Icon(Icons.chevron_right),
-          onTap: () => _showImportDialog(context),
+          onTap: () => _showImportDialog(context, ref),
         ),
         ListTile(
           leading: const Icon(Icons.refresh),
@@ -330,7 +330,7 @@ class SettingsScreen extends ConsumerWidget {
     }
   }
 
-  void _showExportDialog(BuildContext context) {
+  void _showExportDialog(BuildContext context, WidgetRef ref) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -346,7 +346,7 @@ class SettingsScreen extends ConsumerWidget {
     );
   }
 
-  void _showImportDialog(BuildContext context) {
+  void _showImportDialog(BuildContext context, WidgetRef ref) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
