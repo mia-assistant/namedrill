@@ -1,0 +1,75 @@
+PRIVACY POLICY
+NameDrill
+
+Last updated: February 6, 2026
+
+================================================================================
+
+NameDrill is a name-learning flashcard app designed to help teachers remember
+their students' names. We built it with your privacy in mind.
+
+    🔒 We don't collect any of your data. Everything stays on your device.
+
+================================================================================
+
+DATA WE COLLECT
+---------------
+None.
+
+NameDrill does not collect, transmit, or store any personal information on
+external servers. We have no analytics, no tracking, and no third-party SDKs
+that collect data.
+
+
+YOUR DATA STAYS ON YOUR DEVICE
+------------------------------
+All information you enter into NameDrill — including:
+
+  • Student names
+  • Class groups
+  • Photos you add
+  • Your learning progress
+
+...is stored ONLY on your device. We never see it, and it never leaves your
+phone.
+
+
+PHOTOS
+------
+Photos you take or import are stored locally on your device. They are never
+uploaded to any server or shared with anyone. If you delete the app, the
+photos stored within it are deleted too.
+
+
+IN-APP PURCHASES
+----------------
+Premium features are available through the App Store (iOS) or Google Play
+Store (Android). All payment processing is handled entirely by Apple or
+Google. We do not receive or store any payment information — only
+confirmation that a purchase was made.
+
+
+CHILDREN'S PRIVACY
+------------------
+Since we don't collect any data, there's no personal information from
+children (or anyone) to worry about. The app simply doesn't transmit data
+off your device.
+
+
+CHANGES TO THIS POLICY
+----------------------
+If we ever change this policy, we'll update the date at the top. But
+honestly, our commitment is simple: your data is yours, and we don't want it.
+
+
+================================================================================
+
+CONTACT US
+----------
+Questions? Concerns? We'd love to hear from you.
+
+Email: support@namedrill.app
+
+================================================================================
+
+© 2026 NameDrill. Made with love for teachers everywhere.
