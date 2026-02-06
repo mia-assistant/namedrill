@@ -1,0 +1,73 @@
+appId: com.namedrill.namedrill
+---
+# NameDrill - Quiz Mode Complete Flow Test
+# Tests the full quiz flow including results screen
+# WARNING: This test takes ~65 seconds due to the 60-second quiz timer
+# Requires: App built with --dart-define=TEST_MODE=true
+
+- launchApp:
+    clearState: true
+
+# Wait for app to load with test data
+- extendedWaitUntil:
+    visible: "NameDrill"
+    timeout: 20000
+
+# Navigate to Test Group
+- extendedWaitUntil:
+    visible: "Test Group"
+    timeout: 15000
+- tapOn: "Test Group"
+
+# Start Quiz
+- extendedWaitUntil:
+    visible: "Quiz"
+    timeout: 10000
+- tapOn: "Quiz"
+
+# Wait for quiz to load
+- extendedWaitUntil:
+    visible: "Quiz Photo"
+    timeout: 15000
+
+# Answer several questions rapidly
+- repeat:
+    times: 10
+    commands:
+      - tapOn:
+          text: "Answer option.*"
+      - extendedWaitUntil:
+          visible: "Quiz Photo"
+          timeout: 3000
+
+# Continue answering until timer ends
+# The quiz auto-ends after 60 seconds
+- extendedWaitUntil:
+    visible: "Quiz Complete"
+    timeout: 65000
+
+# Verify results screen elements
+- assertVisible: "Quiz Results"
+- assertVisible: "Score"
+- assertVisible: "High Score"
+- assertVisible: "Day Streak"
+
+# Verify action buttons
+- assertVisible: "Try Again"
+- assertVisible: "Done"
+
+# Test Try Again button
+- tapOn: "Try Again"
+
+# Verify quiz restarts
+- extendedWaitUntil:
+    visible: "Quiz Photo"
+    timeout: 10000
+
+# Navigate back instead of waiting for another 60 seconds
+- back
+
+# Verify back on group detail
+- extendedWaitUntil:
+    visible: "Quiz"
+    timeout: 10000

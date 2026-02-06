@@ -5,10 +5,14 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'core/theme/app_theme.dart';
 import 'core/constants/app_constants.dart';
+import 'core/utils/test_data_seeder.dart';
 import 'data/models/settings_model.dart';
 import 'presentation/providers/app_providers.dart';
 import 'presentation/screens/home/home_screen.dart';
 import 'presentation/screens/onboarding/onboarding_screen.dart';
+
+// Test mode flag - set via --dart-define=TEST_MODE=true
+const bool kTestMode = bool.fromEnvironment('TEST_MODE', defaultValue: false);
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -21,7 +25,17 @@ void main() async {
 
   // Check if onboarding is complete
   final prefs = await SharedPreferences.getInstance();
-  final onboardingComplete = prefs.getBool(AppConstants.prefOnboardingComplete) ?? false;
+  bool onboardingComplete = prefs.getBool(AppConstants.prefOnboardingComplete) ?? false;
+
+  // In test mode, seed test data and skip onboarding
+  if (kTestMode) {
+    debugPrint('TEST MODE: Seeding test data...');
+    await TestDataSeeder.clearAllData();
+    await TestDataSeeder.seedTestGroup(groupName: 'Test Group', peopleCount: 10);
+    await prefs.setBool(AppConstants.prefOnboardingComplete, true);
+    onboardingComplete = true;
+    debugPrint('TEST MODE: Test data seeded successfully');
+  }
 
   runApp(
     ProviderScope(

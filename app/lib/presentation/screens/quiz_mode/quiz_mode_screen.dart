@@ -187,7 +187,10 @@ class _QuizModeScreenState extends ConsumerState<QuizModeScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Score: $_score'),
+        title: Semantics(
+          label: 'Quiz Score $_score',
+          child: Text('Score: $_score'),
+        ),
         actions: [
           Center(
             child: Padding(
@@ -210,20 +213,24 @@ class _QuizModeScreenState extends ConsumerState<QuizModeScreen> {
 
           // Photo
           Expanded(
-            child: Padding(
-              padding: const EdgeInsets.all(24),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(20),
-                child: Image.file(
-                  File(_currentPerson!.photoPath),
-                  fit: BoxFit.cover,
-                  width: double.infinity,
-                  errorBuilder: (_, __, ___) => Container(
-                    color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                    child: Icon(
-                      Icons.person,
-                      size: 80,
-                      color: Theme.of(context).colorScheme.outline,
+            child: Semantics(
+              label: 'Quiz Photo',
+              image: true,
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(20),
+                  child: Image.file(
+                    File(_currentPerson!.photoPath),
+                    fit: BoxFit.cover,
+                    width: double.infinity,
+                    errorBuilder: (_, __, ___) => Container(
+                      color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                      child: Icon(
+                        Icons.person,
+                        size: 80,
+                        color: Theme.of(context).colorScheme.outline,
+                      ),
                     ),
                   ),
                 ),
@@ -232,26 +239,30 @@ class _QuizModeScreenState extends ConsumerState<QuizModeScreen> {
           ),
 
           // Options
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
-            child: Column(
-              children: [
-                Row(
-                  children: [
-                    Expanded(child: _buildOptionButton(_options[0])),
-                    const SizedBox(width: 12),
-                    Expanded(child: _buildOptionButton(_options[1])),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                Row(
-                  children: [
-                    Expanded(child: _buildOptionButton(_options[2])),
-                    const SizedBox(width: 12),
-                    Expanded(child: _buildOptionButton(_options[3])),
-                  ],
-                ),
-              ],
+          Semantics(
+            label: 'Quiz Options',
+            container: true,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+              child: Column(
+                children: [
+                  Row(
+                    children: [
+                      Expanded(child: _buildOptionButton(_options[0])),
+                      const SizedBox(width: 12),
+                      Expanded(child: _buildOptionButton(_options[1])),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      Expanded(child: _buildOptionButton(_options[2])),
+                      const SizedBox(width: 12),
+                      Expanded(child: _buildOptionButton(_options[3])),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
         ],
@@ -264,31 +275,34 @@ class _QuizModeScreenState extends ConsumerState<QuizModeScreen> {
     final seconds = _timeRemaining % 60;
     final timeText = '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
 
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(
-        color: _timeRemaining <= 10
-            ? Colors.red.withOpacity(0.2)
-            : Theme.of(context).colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            Icons.timer_outlined,
-            size: 16,
-            color: _timeRemaining <= 10 ? Colors.red : null,
-          ),
-          const SizedBox(width: 4),
-          Text(
-            timeText,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: _timeRemaining <= 10 ? Colors.red : null,
-                ),
-          ),
-        ],
+    return Semantics(
+      label: 'Time remaining $timeText',
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        decoration: BoxDecoration(
+          color: _timeRemaining <= 10
+              ? Colors.red.withOpacity(0.2)
+              : Theme.of(context).colorScheme.surfaceContainerHighest,
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.timer_outlined,
+              size: 16,
+              color: _timeRemaining <= 10 ? Colors.red : null,
+            ),
+            const SizedBox(width: 4),
+            Text(
+              timeText,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: _timeRemaining <= 10 ? Colors.red : null,
+                  ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -311,24 +325,28 @@ class _QuizModeScreenState extends ConsumerState<QuizModeScreen> {
       }
     }
 
-    return SizedBox(
-      height: 56,
-      child: ElevatedButton(
-        onPressed: _showingResult ? null : () => _selectAnswer(name),
-        style: ElevatedButton.styleFrom(
-          backgroundColor: backgroundColor ?? Theme.of(context).colorScheme.surface,
-          foregroundColor: foregroundColor ?? Theme.of(context).colorScheme.onSurface,
-          elevation: 0,
-          side: border ?? BorderSide(color: Theme.of(context).colorScheme.outline),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+    return Semantics(
+      label: 'Answer option $name',
+      button: true,
+      child: SizedBox(
+        height: 56,
+        child: ElevatedButton(
+          onPressed: _showingResult ? null : () => _selectAnswer(name),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: backgroundColor ?? Theme.of(context).colorScheme.surface,
+            foregroundColor: foregroundColor ?? Theme.of(context).colorScheme.onSurface,
+            elevation: 0,
+            side: border ?? BorderSide(color: Theme.of(context).colorScheme.outline),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
           ),
-        ),
-        child: Text(
-          name,
-          style: const TextStyle(fontSize: 16),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
+          child: Text(
+            name,
+            style: const TextStyle(fontSize: 16),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
         ),
       ),
     );
@@ -338,7 +356,7 @@ class _QuizModeScreenState extends ConsumerState<QuizModeScreen> {
     final isNewHighScore = _highScore != null && _score == _highScore && _score > 0;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Quiz Complete')),
+      appBar: AppBar(title: Semantics(label: 'Quiz Complete', child: const Text('Quiz Complete'))),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(24),
@@ -348,11 +366,14 @@ class _QuizModeScreenState extends ConsumerState<QuizModeScreen> {
               if (isNewHighScore) ...[
                 const Icon(Icons.emoji_events, size: 64, color: Colors.amber),
                 const SizedBox(height: 16),
-                Text(
-                  '🎉 New High Score!',
-                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                        color: Colors.amber,
-                      ),
+                Semantics(
+                  label: 'New High Score',
+                  child: Text(
+                    '🎉 New High Score!',
+                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                          color: Colors.amber,
+                        ),
+                  ),
                 ),
               ] else ...[
                 Icon(
@@ -361,22 +382,29 @@ class _QuizModeScreenState extends ConsumerState<QuizModeScreen> {
                   color: _score > 0 ? Colors.green : Colors.grey,
                 ),
                 const SizedBox(height: 16),
-                Text(
-                  _score > 0 ? 'Nice work!' : 'Keep practicing!',
-                  style: Theme.of(context).textTheme.headlineSmall,
+                Semantics(
+                  label: _score > 0 ? 'Nice work' : 'Keep practicing',
+                  child: Text(
+                    _score > 0 ? 'Nice work!' : 'Keep practicing!',
+                    style: Theme.of(context).textTheme.headlineSmall,
+                  ),
                 ),
               ],
 
               const SizedBox(height: 32),
 
               // Stats row
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  _buildResultStat('$_score', 'Score'),
-                  _buildResultStat('${_highScore ?? 0}', 'High Score'),
-                  _buildResultStat('$_streak', 'Day Streak'),
-                ],
+              Semantics(
+                label: 'Quiz Results',
+                container: true,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    _buildResultStat('$_score', 'Score'),
+                    _buildResultStat('${_highScore ?? 0}', 'High Score'),
+                    _buildResultStat('$_streak', 'Day Streak'),
+                  ],
+                ),
               ),
 
               if (_missedPeople.isNotEmpty) ...[
@@ -407,24 +435,32 @@ class _QuizModeScreenState extends ConsumerState<QuizModeScreen> {
               Row(
                 children: [
                   Expanded(
-                    child: OutlinedButton(
-                      onPressed: () {
-                        setState(() {
-                          _score = 0;
-                          _timeRemaining = AppConstants.quizDurationSeconds;
-                          _isFinished = false;
-                          _missedPeople.clear();
-                        });
-                        _startQuiz();
-                      },
-                      child: const Text('Try Again'),
+                    child: Semantics(
+                      label: 'Try Again',
+                      button: true,
+                      child: OutlinedButton(
+                        onPressed: () {
+                          setState(() {
+                            _score = 0;
+                            _timeRemaining = AppConstants.quizDurationSeconds;
+                            _isFinished = false;
+                            _missedPeople.clear();
+                          });
+                          _startQuiz();
+                        },
+                        child: const Text('Try Again'),
+                      ),
                     ),
                   ),
                   const SizedBox(width: 16),
                   Expanded(
-                    child: ElevatedButton(
-                      onPressed: () => Navigator.pop(context),
-                      child: const Text('Done'),
+                    child: Semantics(
+                      label: 'Done',
+                      button: true,
+                      child: ElevatedButton(
+                        onPressed: () => Navigator.pop(context),
+                        child: const Text('Done'),
+                      ),
                     ),
                   ),
                 ],

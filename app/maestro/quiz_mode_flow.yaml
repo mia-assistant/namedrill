@@ -1,0 +1,71 @@
+appId: com.namedrill.namedrill
+---
+# NameDrill - Quiz Mode Flow Test (Fast)
+# Tests quiz mode UI without waiting for full 60-second timer
+# Requires: App built with --dart-define=TEST_MODE=true (seeds 10 test people)
+
+- launchApp:
+    clearState: true
+
+# Wait for app to load (TEST_MODE skips onboarding and seeds data)
+- extendedWaitUntil:
+    visible: "NameDrill"
+    timeout: 20000
+
+# Test Group should exist from test data seeding
+- extendedWaitUntil:
+    visible: "Test Group"
+    timeout: 15000
+
+# Tap on the Test Group to navigate to group details
+- tapOn: "Test Group"
+
+# Wait for group detail screen with Quiz button
+- extendedWaitUntil:
+    visible: "Quiz"
+    timeout: 10000
+
+# Verify Quiz button is enabled (group has 10 people, need 8 for quiz)
+- assertVisible: "Quiz"
+
+# Start Quiz Mode
+- tapOn: "Quiz"
+
+# Wait for quiz to load - should see the quiz photo and answer options
+- extendedWaitUntil:
+    visible: "Quiz Photo"
+    timeout: 15000
+
+# Verify quiz UI elements are present
+- assertVisible: "Quiz Options"
+
+# Answer several questions to verify the flow works
+# Add a small delay between answers for the 800ms result display
+- tapOn:
+    text: "Answer option.*"
+
+- extendedWaitUntil:
+    visible: "Quiz Photo"
+    timeout: 5000
+
+- tapOn:
+    text: "Answer option.*"
+
+- extendedWaitUntil:
+    visible: "Quiz Photo"
+    timeout: 5000
+
+- tapOn:
+    text: "Answer option.*"
+
+- extendedWaitUntil:
+    visible: "Quiz Photo"
+    timeout: 5000
+
+# Quiz is working, navigate back to verify navigation
+- back
+
+# Verify we're back on group detail
+- extendedWaitUntil:
+    visible: "Quiz"
+    timeout: 10000
