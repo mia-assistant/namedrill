@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/constants/app_constants.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../../data/models/group_model.dart';
 import '../../../data/models/person_model.dart';
 import '../../../data/models/quiz_score_model.dart';
@@ -33,6 +34,15 @@ class _QuizModeScreenState extends ConsumerState<QuizModeScreen> {
   List<PersonModel> _missedPeople = [];
   int? _highScore;
   int _streak = 0;
+
+  Color get groupColor {
+    if (widget.group.color == null) return AppTheme.primaryColor;
+    try {
+      return Color(int.parse(widget.group.color!.replaceFirst('#', '0xFF')));
+    } catch (e) {
+      return AppTheme.primaryColor;
+    }
+  }
 
   @override
   void initState() {
@@ -186,10 +196,13 @@ class _QuizModeScreenState extends ConsumerState<QuizModeScreen> {
     }
 
     return Scaffold(
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
         title: Semantics(
           label: 'Quiz Score $_score',
-          child: Text('Score: $_score'),
+          child: _buildScoreChip(),
         ),
         actions: [
           Center(
@@ -200,26 +213,146 @@ class _QuizModeScreenState extends ConsumerState<QuizModeScreen> {
           ),
         ],
       ),
-      body: Column(
-        children: [
-          // Timer progress bar
-          LinearProgressIndicator(
-            value: _timeRemaining / AppConstants.quizDurationSeconds,
-            backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
-            valueColor: AlwaysStoppedAnimation<Color>(
-              _timeRemaining <= 10 ? Colors.red : Theme.of(context).colorScheme.primary,
-            ),
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              groupColor.withOpacity(0.2),
+              Theme.of(context).scaffoldBackgroundColor,
+            ],
+            stops: const [0.0, 0.4],
           ),
-
-          // Photo
-          Expanded(
-            child: Semantics(
-              label: 'Quiz Photo',
-              image: true,
-              child: Padding(
-                padding: const EdgeInsets.all(24),
+        ),
+        child: SafeArea(
+          child: Column(
+            children: [
+              // Timer progress bar
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
                 child: ClipRRect(
-                  borderRadius: BorderRadius.circular(20),
+                  borderRadius: BorderRadius.circular(4),
+                  child: LinearProgressIndicator(
+                    value: _timeRemaining / AppConstants.quizDurationSeconds,
+                    backgroundColor: groupColor.withOpacity(0.2),
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      _timeRemaining <= 10 ? AppTheme.errorColor : groupColor,
+                    ),
+                    minHeight: 6,
+                  ),
+                ),
+              ),
+
+              // Photo card
+              Expanded(
+                child: Semantics(
+                  label: 'Quiz Photo',
+                  image: true,
+                  child: Padding(
+                    padding: const EdgeInsets.all(24),
+                    child: _buildPhotoCard(),
+                  ),
+                ),
+              ),
+
+              // Options
+              Semantics(
+                label: 'Quiz Options',
+                container: true,
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+                  child: Column(
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(child: _buildOptionButton(_options[0])),
+                          const SizedBox(width: 12),
+                          Expanded(child: _buildOptionButton(_options[1])),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      Row(
+                        children: [
+                          Expanded(child: _buildOptionButton(_options[2])),
+                          const SizedBox(width: 12),
+                          Expanded(child: _buildOptionButton(_options[3])),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildScoreChip() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+      decoration: BoxDecoration(
+        color: AppTheme.primaryColor.withOpacity(0.15),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.star, size: 18, color: Colors.amber[700]),
+          const SizedBox(width: 6),
+          Text(
+            '$_score',
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: AppTheme.primaryColor,
+                ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPhotoCard() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
+    return Container(
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: groupColor.withOpacity(0.2),
+            blurRadius: 24,
+            offset: const Offset(0, 10),
+          ),
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(24),
+        child: Column(
+          children: [
+            // Colored accent bar
+            Container(
+              height: 6,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [groupColor, groupColor.withOpacity(0.7)],
+                ),
+              ),
+            ),
+            // Photo
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(16),
                   child: Image.file(
                     File(_currentPerson!.photoPath),
                     fit: BoxFit.cover,
@@ -236,36 +369,8 @@ class _QuizModeScreenState extends ConsumerState<QuizModeScreen> {
                 ),
               ),
             ),
-          ),
-
-          // Options
-          Semantics(
-            label: 'Quiz Options',
-            container: true,
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
-              child: Column(
-                children: [
-                  Row(
-                    children: [
-                      Expanded(child: _buildOptionButton(_options[0])),
-                      const SizedBox(width: 12),
-                      Expanded(child: _buildOptionButton(_options[1])),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  Row(
-                    children: [
-                      Expanded(child: _buildOptionButton(_options[2])),
-                      const SizedBox(width: 12),
-                      Expanded(child: _buildOptionButton(_options[3])),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -274,31 +379,35 @@ class _QuizModeScreenState extends ConsumerState<QuizModeScreen> {
     final minutes = _timeRemaining ~/ 60;
     final seconds = _timeRemaining % 60;
     final timeText = '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
+    final isLow = _timeRemaining <= 10;
 
     return Semantics(
       label: 'Time remaining $timeText',
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
         decoration: BoxDecoration(
-          color: _timeRemaining <= 10
-              ? Colors.red.withOpacity(0.2)
+          color: isLow
+              ? AppTheme.errorColor.withOpacity(0.15)
               : Theme.of(context).colorScheme.surfaceContainerHighest,
           borderRadius: BorderRadius.circular(20),
+          border: isLow
+              ? Border.all(color: AppTheme.errorColor.withOpacity(0.3))
+              : null,
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(
               Icons.timer_outlined,
-              size: 16,
-              color: _timeRemaining <= 10 ? Colors.red : null,
+              size: 18,
+              color: isLow ? AppTheme.errorColor : Theme.of(context).colorScheme.outline,
             ),
-            const SizedBox(width: 4),
+            const SizedBox(width: 6),
             Text(
               timeText,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              style: Theme.of(context).textTheme.titleSmall?.copyWith(
                     fontWeight: FontWeight.bold,
-                    color: _timeRemaining <= 10 ? Colors.red : null,
+                    color: isLow ? AppTheme.errorColor : null,
                   ),
             ),
           ],
@@ -310,42 +419,71 @@ class _QuizModeScreenState extends ConsumerState<QuizModeScreen> {
   Widget _buildOptionButton(String name) {
     Color? backgroundColor;
     Color? foregroundColor;
-    BorderSide? border;
+    Color? borderColor;
 
     if (_showingResult) {
       final isCorrect = name == _currentPerson!.name;
       final isSelected = name == _selectedAnswer;
 
       if (isCorrect) {
-        backgroundColor = Colors.green;
+        backgroundColor = AppTheme.successColor;
         foregroundColor = Colors.white;
+        borderColor = AppTheme.successColor;
       } else if (isSelected) {
-        backgroundColor = Colors.red;
+        backgroundColor = AppTheme.errorColor;
         foregroundColor = Colors.white;
+        borderColor = AppTheme.errorColor;
       }
     }
 
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
     return Semantics(
       label: 'Answer option $name',
       button: true,
       child: SizedBox(
-        height: 56,
-        child: ElevatedButton(
-          onPressed: _showingResult ? null : () => _selectAnswer(name),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: backgroundColor ?? Theme.of(context).colorScheme.surface,
-            foregroundColor: foregroundColor ?? Theme.of(context).colorScheme.onSurface,
-            elevation: 0,
-            side: border ?? BorderSide(color: Theme.of(context).colorScheme.outline),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
+        height: 60,
+        child: Material(
+          color: backgroundColor ?? (isDark ? const Color(0xFF1E1E1E) : Colors.white),
+          borderRadius: BorderRadius.circular(14),
+          child: InkWell(
+            onTap: _showingResult ? null : () => _selectAnswer(name),
+            borderRadius: BorderRadius.circular(14),
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(
+                  color: borderColor ?? 
+                      (isDark ? Colors.grey[700]! : Colors.grey[300]!),
+                  width: _showingResult ? 2 : 1,
+                ),
+                boxShadow: _showingResult
+                    ? null
+                    : [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.04),
+                          blurRadius: 4,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+              ),
+              child: Center(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  child: Text(
+                    name,
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                      color: foregroundColor ?? Theme.of(context).colorScheme.onSurface,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ),
             ),
-          ),
-          child: Text(
-            name,
-            style: const TextStyle(fontSize: 16),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
           ),
         ),
       ),
@@ -356,138 +494,221 @@ class _QuizModeScreenState extends ConsumerState<QuizModeScreen> {
     final isNewHighScore = _highScore != null && _score == _highScore && _score > 0;
 
     return Scaffold(
-      appBar: AppBar(title: Semantics(label: 'Quiz Complete', child: const Text('Quiz Complete'))),
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              if (isNewHighScore) ...[
-                const Icon(Icons.emoji_events, size: 64, color: Colors.amber),
-                const SizedBox(height: 16),
-                Semantics(
-                  label: 'New High Score',
-                  child: Text(
-                    '🎉 New High Score!',
-                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                          color: Colors.amber,
-                        ),
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              (isNewHighScore ? Colors.amber : groupColor).withOpacity(0.2),
+              Theme.of(context).scaffoldBackgroundColor,
+            ],
+            stops: const [0.0, 0.5],
+          ),
+        ),
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                // Trophy or check icon
+                Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    Container(
+                      width: 110,
+                      height: 110,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: (isNewHighScore ? Colors.amber : groupColor).withOpacity(0.1),
+                      ),
+                    ),
+                    Container(
+                      width: 85,
+                      height: 85,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: (isNewHighScore ? Colors.amber : groupColor).withOpacity(0.15),
+                      ),
+                    ),
+                    Icon(
+                      isNewHighScore ? Icons.emoji_events : Icons.check_circle,
+                      size: 50,
+                      color: isNewHighScore ? Colors.amber : groupColor,
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 24),
+                
+                if (isNewHighScore) ...[
+                  Semantics(
+                    label: 'New High Score',
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: Colors.amber.withOpacity(0.15),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Text(
+                        '🎉 New High Score!',
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                              color: Colors.amber[800],
+                              fontWeight: FontWeight.bold,
+                            ),
+                      ),
+                    ),
                   ),
-                ),
-              ] else ...[
-                Icon(
-                  _score > 0 ? Icons.check_circle : Icons.sentiment_neutral,
-                  size: 64,
-                  color: _score > 0 ? Colors.green : Colors.grey,
-                ),
-                const SizedBox(height: 16),
+                  const SizedBox(height: 12),
+                ],
+                
                 Semantics(
                   label: _score > 0 ? 'Nice work' : 'Keep practicing',
                   child: Text(
                     _score > 0 ? 'Nice work!' : 'Keep practicing!',
-                    style: Theme.of(context).textTheme.headlineSmall,
+                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
                   ),
                 ),
-              ],
 
-              const SizedBox(height: 32),
-
-              // Stats row
-              Semantics(
-                label: 'Quiz Results',
-                container: true,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    _buildResultStat('$_score', 'Score'),
-                    _buildResultStat('${_highScore ?? 0}', 'High Score'),
-                    _buildResultStat('$_streak', 'Day Streak'),
-                  ],
-                ),
-              ),
-
-              if (_missedPeople.isNotEmpty) ...[
                 const SizedBox(height: 32),
-                Text(
-                  'Missed:',
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-                const SizedBox(height: 16),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  alignment: WrapAlignment.center,
-                  children: _missedPeople.take(5).map((person) {
-                    return Chip(
-                      avatar: CircleAvatar(
-                        backgroundImage: FileImage(File(person.photoPath)),
-                        onBackgroundImageError: (_, __) {},
-                      ),
-                      label: Text(person.name),
-                    );
-                  }).toList(),
-                ),
-              ],
 
-              const Spacer(),
-
-              Row(
-                children: [
-                  Expanded(
-                    child: Semantics(
-                      label: 'Try Again',
-                      button: true,
-                      child: OutlinedButton(
-                        onPressed: () {
-                          setState(() {
-                            _score = 0;
-                            _timeRemaining = AppConstants.quizDurationSeconds;
-                            _isFinished = false;
-                            _missedPeople.clear();
-                          });
-                          _startQuiz();
-                        },
-                        child: const Text('Try Again'),
-                      ),
-                    ),
+                // Stats cards
+                Semantics(
+                  label: 'Quiz Results',
+                  container: true,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      _buildStatCard('$_score', 'Score', Icons.star, Colors.amber),
+                      _buildStatCard('${_highScore ?? 0}', 'High Score', Icons.emoji_events, groupColor),
+                      _buildStatCard('$_streak', 'Streak', Icons.local_fire_department, Colors.orange),
+                    ],
                   ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Semantics(
-                      label: 'Done',
-                      button: true,
-                      child: ElevatedButton(
-                        onPressed: () => Navigator.pop(context),
-                        child: const Text('Done'),
-                      ),
-                    ),
+                ),
+
+                if (_missedPeople.isNotEmpty) ...[
+                  const SizedBox(height: 32),
+                  Text(
+                    'Missed:',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                  ),
+                  const SizedBox(height: 16),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    alignment: WrapAlignment.center,
+                    children: _missedPeople.take(5).map((person) {
+                      return Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                            color: Theme.of(context).colorScheme.outline.withOpacity(0.2),
+                          ),
+                        ),
+                        child: Chip(
+                          avatar: CircleAvatar(
+                            backgroundImage: FileImage(File(person.photoPath)),
+                            onBackgroundImageError: (_, __) {},
+                          ),
+                          label: Text(person.name),
+                          backgroundColor: Colors.transparent,
+                          side: BorderSide.none,
+                        ),
+                      );
+                    }).toList(),
                   ),
                 ],
-              ),
-            ],
+
+                const Spacer(),
+
+                Row(
+                  children: [
+                    Expanded(
+                      child: Semantics(
+                        label: 'Try Again',
+                        button: true,
+                        child: OutlinedButton.icon(
+                          onPressed: () {
+                            setState(() {
+                              _score = 0;
+                              _timeRemaining = AppConstants.quizDurationSeconds;
+                              _isFinished = false;
+                              _missedPeople.clear();
+                            });
+                            _startQuiz();
+                          },
+                          icon: const Icon(Icons.refresh),
+                          label: const Text('Try Again'),
+                          style: OutlinedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Semantics(
+                        label: 'Done',
+                        button: true,
+                        child: ElevatedButton.icon(
+                          onPressed: () => Navigator.pop(context),
+                          icon: const Icon(Icons.check),
+                          label: const Text('Done'),
+                          style: ElevatedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),
     );
   }
 
-  Widget _buildResultStat(String value, String label) {
-    return Column(
-      children: [
-        Text(
-          value,
-          style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+  Widget _buildStatCard(String value, String label, IconData icon, Color color) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: Theme.of(context).colorScheme.outline.withOpacity(0.1),
         ),
-        Text(
-          label,
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Theme.of(context).colorScheme.outline,
-              ),
-        ),
-      ],
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          Icon(icon, size: 22, color: color),
+          const SizedBox(height: 4),
+          Text(
+            value,
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+          ),
+          Text(
+            label,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: Theme.of(context).colorScheme.outline,
+                ),
+          ),
+        ],
+      ),
     );
   }
 }
