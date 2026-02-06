@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:file_picker/file_picker.dart';
 
 import '../../../core/constants/app_constants.dart';
 import '../../../core/providers/purchase_providers.dart';
+import '../../../core/services/backup_service.dart';
 import '../../../data/models/settings_model.dart';
 import '../../../data/database/database_helper.dart';
 import '../../providers/app_providers.dart';
@@ -349,15 +351,75 @@ class SettingsScreen extends ConsumerWidget {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Export Data'),
-        content: const Text('Export functionality coming soon!'),
+        content: const Text(
+          'This will create a backup file with all your groups, people, photos, and learning progress.\n\nThe file will be saved to your app documents folder.',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('OK'),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              Navigator.pop(context);
+              await _performExport(context);
+            },
+            child: const Text('Export'),
           ),
         ],
       ),
     );
+  }
+
+  Future<void> _performExport(BuildContext context) async {
+    // Show loading indicator
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const Center(
+        child: Card(
+          child: Padding(
+            padding: EdgeInsets.all(20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                CircularProgressIndicator(),
+                SizedBox(height: 16),
+                Text('Exporting...'),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    try {
+      final filePath = await BackupService.exportBackup();
+      
+      if (context.mounted) {
+        Navigator.pop(context); // Close loading dialog
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Backup saved to:\n$filePath'),
+            duration: const Duration(seconds: 5),
+            action: SnackBarAction(
+              label: 'OK',
+              onPressed: () {},
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        Navigator.pop(context); // Close loading dialog
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Export failed: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
   void _showImportDialog(BuildContext context, WidgetRef ref) {
@@ -365,15 +427,97 @@ class SettingsScreen extends ConsumerWidget {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Import Data'),
-        content: const Text('Import functionality coming soon!'),
+        content: const Text(
+          'This will REPLACE all your current data with the backup.\n\n'
+          'Your current groups, people, and progress will be lost!\n\n'
+          'Select a .json backup file to restore.',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('OK'),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              Navigator.pop(context);
+              await _performImport(context, ref);
+            },
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
+            child: const Text('Select File'),
           ),
         ],
       ),
     );
+  }
+
+  Future<void> _performImport(BuildContext context, WidgetRef ref) async {
+    try {
+      // Pick a JSON file
+      final result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['json'],
+      );
+
+      if (result == null || result.files.isEmpty) {
+        return; // User cancelled
+      }
+
+      final filePath = result.files.first.path;
+      if (filePath == null) {
+        throw Exception('Could not access file');
+      }
+
+      // Show loading indicator
+      if (context.mounted) {
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) => const Center(
+            child: Card(
+              child: Padding(
+                padding: EdgeInsets.all(20),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    CircularProgressIndicator(),
+                    SizedBox(height: 16),
+                    Text('Importing...'),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+      }
+
+      await BackupService.importBackup(filePath);
+
+      // Refresh all providers
+      ref.invalidate(groupsProvider);
+      ref.invalidate(userStatsProvider);
+      ref.invalidate(settingsProvider);
+
+      if (context.mounted) {
+        Navigator.pop(context); // Close loading dialog
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Data restored successfully!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        // Close loading dialog if it's showing
+        Navigator.of(context).popUntil((route) => route.isFirst || route.settings.name == '/settings');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Import failed: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
   void _showResetProgressDialog(BuildContext context, WidgetRef ref) {

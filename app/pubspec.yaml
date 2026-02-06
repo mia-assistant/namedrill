@@ -38,7 +38,6 @@ dependencies:
   shared_preferences: ^2.2.2
   
   # Backup/Export
-  archive: ^4.0.2
   file_picker: ^8.0.0
   
   # Permissions
