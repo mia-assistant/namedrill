@@ -1,0 +1,62 @@
+appId: com.namedrill.namedrill
+---
+# NameDrill - Full Flow Test
+
+- launchApp:
+    clearState: true
+
+# Wait for app to load
+- extendedWaitUntil:
+    visible: "Continue"
+    timeout: 15000
+
+# Onboarding Screen 1
+- tapOn: "Continue"
+
+# Onboarding Screen 2 - How it works  
+- extendedWaitUntil:
+    visible: "Continue"
+    timeout: 10000
+- tapOn: "Continue"
+
+# Onboarding Screen 3 - Camera Permission
+- extendedWaitUntil:
+    visible: "Maybe Later"
+    timeout: 10000
+- tapOn: "Maybe Later"
+
+# Home Screen - Empty State
+- extendedWaitUntil:
+    visible: "NameDrill"
+    timeout: 10000
+- assertVisible: "No groups yet"
+
+# Create a Group
+- tapOn: "New Group"
+- extendedWaitUntil:
+    visible: "Create"
+    timeout: 10000
+- inputText: "History 301"
+- tapOn: "Create"
+
+# Wait for dialog to close and group to appear
+- extendedWaitUntil:
+    visible: "History 301"
+    timeout: 15000
+
+# Tap on the group card to navigate
+- tapOn: "History 301"
+
+# Group Detail Screen
+- extendedWaitUntil:
+    visible: "No people yet"
+    timeout: 10000
+
+# Tap Add Person
+- tapOn: "Add Person"
+
+# Wait for Add Person screen or dialog
+- extendedWaitUntil:
+    visible:
+      text: ".*[Pp]hoto.*|.*[Nn]ame.*|.*[Cc]ancel.*"
+    timeout: 10000

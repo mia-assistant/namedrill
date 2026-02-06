@@ -30,13 +30,16 @@ class GroupCard extends ConsumerWidget {
     final previewPeopleAsync = ref.watch(previewPeopleProvider(group.id));
     final groupStatsAsync = ref.watch(groupStatsProvider(group.id));
 
-    return GestureDetector(
-      onTap: () {
-        debugPrint('GroupCard tapped: ${group.name}');
-        onTap();
-      },
-      behavior: HitTestBehavior.opaque,
-      child: Card(
+    return Semantics(
+      label: group.name,
+      button: true,
+      child: GestureDetector(
+        onTap: () {
+          debugPrint('GroupCard tapped: ${group.name}');
+          onTap();
+        },
+        behavior: HitTestBehavior.opaque,
+        child: Card(
         clipBehavior: Clip.antiAlias,
         child: Padding(
           padding: const EdgeInsets.all(16),
@@ -194,6 +197,7 @@ class GroupCard extends ConsumerWidget {
           ),
         ),
       ),
+    ),
     );
   }
 }

@@ -1,0 +1,44 @@
+appId: com.namedrill.namedrill
+---
+# NameDrill Onboarding + Create Group Flow Test
+
+- launchApp
+
+# Onboarding Screen 1
+- assertVisible: "Welcome to NameDrill"
+- tapOn: "Get Started"
+
+# Onboarding Screen 2
+- assertVisible: "How it works"
+- tapOn: "Continue"
+
+# Onboarding Screen 3 - Camera Permission
+- assertVisible: "Enable Camera"
+- tapOn: "Maybe Later"
+
+# Home Screen - Empty State
+- assertVisible: "NameDrill"
+- assertVisible: "No groups yet"
+
+# Create a Group
+- tapOn: "New Group"
+- assertVisible: "Create Group"
+- tapOn:
+    id: "group_name_field"
+- inputText: "Math 101"
+- tapOn: "Create"
+
+# Verify group was created and navigate to it
+- assertVisible: "Math 101"
+- tapOn: "Math 101"
+
+# Group Detail Screen
+- assertVisible: "No people yet"
+- assertVisible: "Add Person"
+
+# Go back to home
+- back
+
+# Verify we're back on home with the group
+- assertVisible: "Your Groups"
+- assertVisible: "Math 101"

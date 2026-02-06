@@ -1,0 +1,38 @@
+appId: com.namedrill.namedrill
+---
+# NameDrill - Card Navigation + Add Person Flow Test
+
+- launchApp:
+    clearState: true
+
+# Onboarding Screen 1
+- assertVisible: "Welcome to"
+- tapOn: "Get Started"
+
+# Onboarding Screen 2
+- tapOn: "Continue"
+
+# Onboarding Screen 3 - Camera Permission
+- tapOn: "Maybe Later"
+
+# Home Screen - Empty State
+- assertVisible: "NameDrill"
+
+# Create a Group
+- tapOn: "New Group"
+- inputText: "Science 202"
+- tapOn: "Create"
+
+# Tap on the group card to navigate
+- tapOn: "Science 202"
+
+# Group Detail Screen
+- assertVisible: "No people yet"
+
+# Tap Add Person
+- tapOn: "Add Person"
+
+# Should see photo options
+- assertVisible:
+    text: ".*photo.*"
+    optional: true
