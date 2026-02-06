@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'core/services/purchase_service.dart';
 import 'core/theme/app_theme.dart';
 import 'core/constants/app_constants.dart';
 import 'core/utils/test_data_seeder.dart';
@@ -14,6 +15,10 @@ import 'presentation/screens/onboarding/onboarding_screen.dart';
 // Test mode flag - set via --dart-define=TEST_MODE=true
 const bool kTestMode = bool.fromEnvironment('TEST_MODE', defaultValue: false);
 
+// Screenshot mode flag - seeds multiple groups for store listing screenshots
+// set via --dart-define=SCREENSHOT_MODE=true
+const bool kScreenshotMode = bool.fromEnvironment('SCREENSHOT_MODE', defaultValue: false);
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
@@ -23,12 +28,23 @@ void main() async {
     DeviceOrientation.portraitDown,
   ]);
 
+  // Initialize RevenueCat for in-app purchases
+  await PurchaseService.instance.initialize();
+
   // Check if onboarding is complete
   final prefs = await SharedPreferences.getInstance();
   bool onboardingComplete = prefs.getBool(AppConstants.prefOnboardingComplete) ?? false;
 
+  // In screenshot mode, seed multiple groups for store listing
+  if (kScreenshotMode) {
+    debugPrint('SCREENSHOT MODE: Seeding screenshot data...');
+    await TestDataSeeder.seedScreenshotData();
+    await prefs.setBool(AppConstants.prefOnboardingComplete, true);
+    onboardingComplete = true;
+    debugPrint('SCREENSHOT MODE: Screenshot data seeded successfully');
+  }
   // In test mode, seed test data and skip onboarding
-  if (kTestMode) {
+  else if (kTestMode) {
     debugPrint('TEST MODE: Seeding test data...');
     await TestDataSeeder.clearAllData();
     await TestDataSeeder.seedTestGroup(groupName: 'Test Group', peopleCount: 10);

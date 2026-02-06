@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
+import '../../core/providers/purchase_providers.dart';
 import '../../data/models/models.dart';
 import '../../data/repositories/repositories.dart';
 
@@ -222,8 +223,13 @@ class SettingsNotifier extends StateNotifier<AsyncValue<SettingsModel>> {
   }
 }
 
-// Premium status (convenience)
+// Premium status (convenience) - combines RevenueCat status with local settings
 final isPremiumProvider = Provider<bool>((ref) {
+  // Check RevenueCat status first (source of truth)
+  final purchaseState = ref.watch(purchaseStateProvider);
+  if (purchaseState.isPremium) return true;
+  
+  // Fall back to local settings for offline access
   final settings = ref.watch(settingsProvider);
   return settings.value?.isPremium ?? false;
 });

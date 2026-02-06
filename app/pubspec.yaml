@@ -37,9 +37,16 @@ dependencies:
   intl: ^0.19.0
   shared_preferences: ^2.2.2
   
+  # Backup/Export
+  archive: ^4.0.2
+  file_picker: ^8.0.0
+  
   # Permissions
   permission_handler: ^11.3.0
   url_launcher: ^6.3.1
+  
+  # In-App Purchases
+  purchases_flutter: ^8.4.0
 
 dev_dependencies:
   flutter_test:

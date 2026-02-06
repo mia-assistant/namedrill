@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/constants/app_constants.dart';
+import '../../../core/providers/purchase_providers.dart';
 import '../../../data/models/settings_model.dart';
 import '../../../data/database/database_helper.dart';
 import '../../providers/app_providers.dart';
@@ -13,6 +14,7 @@ class SettingsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final settingsAsync = ref.watch(settingsProvider);
+    final purchaseState = ref.watch(purchaseStateProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -21,17 +23,20 @@ class SettingsScreen extends ConsumerWidget {
       body: settingsAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, _) => Center(child: Text('Error: $error')),
-        data: (settings) => _buildContent(context, ref, settings),
+        data: (settings) => _buildContent(context, ref, settings, purchaseState),
       ),
     );
   }
 
-  Widget _buildContent(BuildContext context, WidgetRef ref, SettingsModel settings) {
+  Widget _buildContent(BuildContext context, WidgetRef ref, SettingsModel settings, PurchaseState purchaseState) {
+    // Use RevenueCat premium status as primary source, fall back to local settings
+    final isPremium = purchaseState.isPremium || settings.isPremium;
+    
     return ListView(
       children: [
         // Premium section
-        if (!settings.isPremium) ...[
-          _buildPremiumCard(context, ref),
+        if (!isPremium) ...[
+          _buildPremiumCard(context, ref, purchaseState),
           const Divider(),
         ],
 
@@ -154,7 +159,9 @@ class SettingsScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildPremiumCard(BuildContext context, WidgetRef ref) {
+  Widget _buildPremiumCard(BuildContext context, WidgetRef ref, PurchaseState purchaseState) {
+    final isLoading = purchaseState.status == PurchaseStatus.loading;
+    
     return Card(
       margin: const EdgeInsets.all(16),
       child: Padding(
@@ -212,19 +219,26 @@ class SettingsScreen extends ConsumerWidget {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: () => _showPurchaseDialog(context, ref),
+                onPressed: isLoading ? null : () => _handlePurchase(context, ref),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.amber,
                   foregroundColor: Colors.black,
                 ),
-                child: const Text('Unlock for \$4.99'),
+                child: isLoading
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor: AlwaysStoppedAnimation<Color>(Colors.black),
+                        ),
+                      )
+                    : Text('Unlock for ${purchaseState.priceString}'),
               ),
             ),
             const SizedBox(height: 8),
             TextButton(
-              onPressed: () {
-                // TODO: Restore purchases
-              },
+              onPressed: isLoading ? null : () => _handleRestore(context, ref),
               child: const Text('Restore Purchase'),
             ),
           ],
@@ -429,35 +443,58 @@ class SettingsScreen extends ConsumerWidget {
     );
   }
 
-  void _showPurchaseDialog(BuildContext context, WidgetRef ref) {
-    // For now, just toggle premium for testing
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Premium'),
-        content: const Text(
-          'In-app purchases are not yet configured. For testing, tap below to unlock premium.',
+  Future<void> _handlePurchase(BuildContext context, WidgetRef ref) async {
+    final success = await ref.read(purchaseStateProvider.notifier).purchasePremium();
+    
+    if (!context.mounted) return;
+    
+    final purchaseState = ref.read(purchaseStateProvider);
+    
+    if (success) {
+      // Also update local settings for offline access
+      ref.read(settingsProvider.notifier).setPremium(true);
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(purchaseState.successMessage ?? 'Premium unlocked!'),
+          backgroundColor: Colors.green,
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              await ref.read(settingsProvider.notifier).setPremium(true);
-              if (context.mounted) {
-                Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Premium unlocked!')),
-                );
-              }
-            },
-            child: const Text('Unlock (Test)'),
-          ),
-        ],
-      ),
-    );
+      );
+    } else if (purchaseState.errorMessage != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(purchaseState.errorMessage!),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  Future<void> _handleRestore(BuildContext context, WidgetRef ref) async {
+    final success = await ref.read(purchaseStateProvider.notifier).restorePurchases();
+    
+    if (!context.mounted) return;
+    
+    final purchaseState = ref.read(purchaseStateProvider);
+    
+    if (success) {
+      // Also update local settings for offline access
+      ref.read(settingsProvider.notifier).setPremium(true);
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(purchaseState.successMessage ?? 'Purchases restored!'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } else if (purchaseState.errorMessage != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(purchaseState.errorMessage!),
+          backgroundColor: Colors.orange,
+        ),
+      );
+    }
   }
 
   Future<void> _openUrl(String urlString) async {

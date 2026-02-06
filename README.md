@@ -73,6 +73,48 @@ lib/
 | Free | $0 | 2 groups, 25 people/group |
 | Premium | $4.99 (one-time) | Unlimited |
 
+## RevenueCat Setup (In-App Purchases)
+
+NameDrill uses [RevenueCat](https://www.revenuecat.com/) for managing in-app purchases. To set up purchases:
+
+### 1. Create RevenueCat Project
+
+1. Sign up at [app.revenuecat.com](https://app.revenuecat.com)
+2. Create a new project for NameDrill
+
+### 2. Configure App Stores
+
+**App Store Connect (iOS):**
+- Create an in-app purchase: Product ID `namedrill_premium`
+- Type: Non-consumable
+- Price: $4.99
+- Add App Store shared secret to RevenueCat
+
+**Google Play Console (Android):**
+- Create an in-app product: Product ID `namedrill_premium`
+- Type: One-time purchase
+- Price: $4.99
+- Link Google Play service credentials to RevenueCat
+
+### 3. RevenueCat Configuration
+
+In the RevenueCat dashboard:
+1. **Product:** Create `namedrill_premium` and map to both store products
+2. **Entitlement:** Create `premium` entitlement
+3. **Offering:** Create `default` offering with the premium product (as Lifetime package)
+
+### 4. Add API Keys
+
+Get your API keys from RevenueCat → Project Settings → API Keys
+
+Edit `lib/core/services/purchase_service.dart`:
+```dart
+static const String _appleApiKey = 'YOUR_REVENUECAT_APPLE_API_KEY';
+static const String _googleApiKey = 'YOUR_REVENUECAT_GOOGLE_API_KEY';
+```
+
+**⚠️ Important:** Do not commit real API keys to version control. Consider using environment variables or a secrets management solution for production.
+
 ## Roadmap
 
 - [ ] Widget for home screen
