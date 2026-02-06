@@ -10,6 +10,7 @@ import '../../widgets/empty_state.dart';
 import '../add_edit_person/add_edit_person_screen.dart';
 import '../learn_mode/learn_mode_screen.dart';
 import '../quiz_mode/quiz_mode_screen.dart';
+import 'edit_group_dialog.dart';
 
 // People notifier provider for specific group
 final peopleNotifierProvider = StateNotifierProvider.family<PeopleNotifier, AsyncValue<List<PersonModel>>, String>(
@@ -369,10 +370,17 @@ class GroupDetailScreen extends ConsumerWidget {
   }
 
   void _showEditGroupDialog(BuildContext context, WidgetRef ref) {
-    // TODO: Implement edit group dialog
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Edit group coming soon')),
-    );
+    showDialog<GroupModel>(
+      context: context,
+      builder: (context) => EditGroupDialog(group: group),
+    ).then((updatedGroup) {
+      if (updatedGroup != null) {
+        // Show success message
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Group updated')),
+        );
+      }
+    });
   }
 
   void _showDeleteConfirmation(BuildContext context, WidgetRef ref) {

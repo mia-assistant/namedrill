@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/constants/app_constants.dart';
 import '../../../data/models/settings_model.dart';
@@ -126,17 +127,13 @@ class SettingsScreen extends ConsumerWidget {
           leading: const Icon(Icons.privacy_tip_outlined),
           title: const Text('Privacy Policy'),
           trailing: const Icon(Icons.open_in_new),
-          onTap: () {
-            // TODO: Open privacy policy URL
-          },
+          onTap: () => _openUrl('https://namedrill.app/privacy'),
         ),
         ListTile(
           leading: const Icon(Icons.mail_outline),
           title: const Text('Send Feedback'),
           trailing: const Icon(Icons.open_in_new),
-          onTap: () {
-            // TODO: Open feedback email
-          },
+          onTap: () => _openUrl('mailto:support@namedrill.app?subject=NameDrill%20Feedback'),
         ),
 
         const SizedBox(height: 32),
@@ -461,5 +458,12 @@ class SettingsScreen extends ConsumerWidget {
         ],
       ),
     );
+  }
+
+  Future<void> _openUrl(String urlString) async {
+    final url = Uri.parse(urlString);
+    if (await canLaunchUrl(url)) {
+      await launchUrl(url, mode: LaunchMode.externalApplication);
+    }
   }
 }
