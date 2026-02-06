@@ -1,0 +1,46 @@
+appId: com.namedrill.namedrill
+---
+# NameDrill - Test Learn Mode Flow
+# Requires: At least 1 person in group (creates one if needed)
+
+- launchApp:
+    clearState: true
+
+# Complete onboarding
+- extendedWaitUntil:
+    visible: "Continue"
+    timeout: 15000
+- tapOn: "Continue"
+- extendedWaitUntil:
+    visible: "Continue"
+    timeout: 10000
+- tapOn: "Continue"
+- extendedWaitUntil:
+    visible: "Maybe Later"
+    timeout: 10000
+- tapOn: "Maybe Later"
+
+# Create a group
+- extendedWaitUntil:
+    visible: "NameDrill"
+    timeout: 10000
+- tapOn: "New Group"
+- extendedWaitUntil:
+    visible: "Create"
+    timeout: 10000
+- inputText: "Test Class"
+- tapOn: "Create"
+
+# Navigate to group
+- extendedWaitUntil:
+    visible: "Test Class"
+    timeout: 15000
+- tapOn: "Test Class"
+
+# Should see empty state with Add Person button
+- extendedWaitUntil:
+    visible: "No people yet"
+    timeout: 10000
+
+# Note: Can't fully test Learn Mode without adding people with photos
+# which requires camera/gallery interaction not easily automated

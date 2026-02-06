@@ -107,15 +107,19 @@ class _CreateGroupDialogState extends ConsumerState<CreateGroupDialog> {
           onPressed: _isLoading ? null : () => Navigator.pop(context),
           child: const Text('Cancel'),
         ),
-        ElevatedButton(
-          onPressed: _isLoading ? null : _createGroup,
-          child: _isLoading
-              ? const SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
-              : const Text('Create'),
+        Semantics(
+          label: 'Create',
+          button: true,
+          child: ElevatedButton(
+            onPressed: _isLoading ? null : _createGroup,
+            child: _isLoading
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Text('Create'),
+          ),
         ),
       ],
     );

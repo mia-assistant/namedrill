@@ -95,10 +95,14 @@ class GroupDetailScreen extends ConsumerWidget {
         icon: Icons.person_add_outlined,
         title: 'No people yet',
         message: 'Add your first person to start learning names',
-        action: ElevatedButton.icon(
-          onPressed: () => _addPerson(context, ref),
-          icon: const Icon(Icons.add),
-          label: const Text('Add Person'),
+        action: Semantics(
+          label: 'Add Person',
+          button: true,
+          child: ElevatedButton.icon(
+            onPressed: () => _addPerson(context, ref),
+            icon: const Icon(Icons.add),
+            label: const Text('Add Person'),
+          ),
         ),
       );
     }
@@ -120,36 +124,44 @@ class GroupDetailScreen extends ConsumerWidget {
             child: Row(
               children: [
                 Expanded(
-                  child: ElevatedButton.icon(
-                    onPressed: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => LearnModeScreen(group: group),
+                  child: Semantics(
+                    label: 'Learn',
+                    button: true,
+                    child: ElevatedButton.icon(
+                      onPressed: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => LearnModeScreen(group: group),
+                        ),
                       ),
-                    ),
-                    icon: const Icon(Icons.school),
-                    label: const Text('Learn'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: groupColor,
-                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      icon: const Icon(Icons.school),
+                      label: const Text('Learn'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: groupColor,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                      ),
                     ),
                   ),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: people.length >= AppConstants.minPeopleForQuiz
-                        ? () => Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => QuizModeScreen(group: group),
-                              ),
-                            )
-                        : null,
-                    icon: const Icon(Icons.quiz),
-                    label: const Text('Quiz'),
-                    style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
+                  child: Semantics(
+                    label: 'Quiz',
+                    button: true,
+                    child: OutlinedButton.icon(
+                      onPressed: people.length >= AppConstants.minPeopleForQuiz
+                          ? () => Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => QuizModeScreen(group: group),
+                                ),
+                              )
+                          : null,
+                      icon: const Icon(Icons.quiz),
+                      label: const Text('Quiz'),
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                      ),
                     ),
                   ),
                 ),

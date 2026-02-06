@@ -51,10 +51,14 @@ class HomeScreen extends ConsumerWidget {
         ),
         data: (groups) => _buildContent(context, ref, groups, isPremium),
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => _showCreateGroupDialog(context, ref),
-        icon: const Icon(Icons.add),
-        label: const Text('New Group'),
+      floatingActionButton: Semantics(
+        label: 'New Group',
+        button: true,
+        child: FloatingActionButton.extended(
+          onPressed: () => _showCreateGroupDialog(context, ref),
+          icon: const Icon(Icons.add),
+          label: const Text('New Group'),
+        ),
       ),
     );
   }

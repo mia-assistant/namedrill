@@ -275,14 +275,18 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           if (_currentPage < 2)
             SizedBox(
               width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () {
-                  _pageController.nextPage(
-                    duration: const Duration(milliseconds: 300),
-                    curve: Curves.easeInOut,
-                  );
-                },
-                child: const Text('Continue'),
+              child: Semantics(
+                label: 'Continue',
+                button: true,
+                child: ElevatedButton(
+                  onPressed: () {
+                    _pageController.nextPage(
+                      duration: const Duration(milliseconds: 300),
+                      curve: Curves.easeInOut,
+                    );
+                  },
+                  child: const Text('Continue'),
+                ),
               ),
             )
           else
@@ -290,17 +294,25 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
               children: [
                 SizedBox(
                   width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: () => _requestPermissionAndContinue(true),
-                    child: const Text('Enable Camera'),
+                  child: Semantics(
+                    label: 'Enable Camera',
+                    button: true,
+                    child: ElevatedButton(
+                      onPressed: () => _requestPermissionAndContinue(true),
+                      child: const Text('Enable Camera'),
+                    ),
                   ),
                 ),
                 const SizedBox(height: 12),
                 SizedBox(
                   width: double.infinity,
-                  child: TextButton(
-                    onPressed: () => _completeOnboarding(),
-                    child: const Text('Maybe Later'),
+                  child: Semantics(
+                    label: 'Maybe Later',
+                    button: true,
+                    child: TextButton(
+                      onPressed: () => _completeOnboarding(),
+                      child: const Text('Maybe Later'),
+                    ),
                   ),
                 ),
               ],
