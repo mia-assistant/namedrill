@@ -1,0 +1,89 @@
+# NameDrill
+
+**Learn names fast with spaced repetition flashcards.**
+
+A Flutter app designed for teachers to learn and remember student names using proven spaced repetition techniques.
+
+## Features
+
+- 📸 **Photo-based flashcards** - Add student photos with names and notes
+- 🎯 **Learn Mode** - Flashcard-style practice with face→name and name→face cards
+- ⏱️ **Quiz Mode** - Timed multiple-choice challenges (60 seconds)
+- 📊 **Progress Tracking** - Track learning progress, streaks, and weak spots
+- 🌙 **Dark Mode** - System default or manual toggle
+- 🔒 **Privacy First** - All data stored locally on device (no cloud)
+- 📦 **Groups** - Organize students by class/period
+
+## Screenshots
+
+*Coming soon*
+
+## Getting Started
+
+### Prerequisites
+
+- Flutter 3.24.0 or higher
+- Android SDK 34+
+- iOS 13+ (for iOS builds)
+
+### Installation
+
+```bash
+# Clone the repository
+git clone https://github.com/mia-assistant/namedrill.git
+
+# Navigate to the app directory
+cd namedrill/app
+
+# Get dependencies
+flutter pub get
+
+# Run the app
+flutter run
+```
+
+## Architecture
+
+- **State Management:** Riverpod
+- **Database:** SQLite (sqflite)
+- **Spaced Repetition:** SM-2 algorithm
+
+### Folder Structure
+
+```
+lib/
+├── core/
+│   ├── constants/    # App constants (limits, durations)
+│   ├── theme/        # App theme (light/dark)
+│   └── utils/        # Spaced repetition algorithm
+├── data/
+│   ├── database/     # SQLite database helper
+│   ├── models/       # Data models
+│   └── repositories/ # Data access layer
+└── presentation/
+    ├── providers/    # Riverpod providers
+    ├── screens/      # All app screens
+    └── widgets/      # Reusable widgets
+```
+
+## Pricing
+
+| Tier | Price | Limits |
+|------|-------|--------|
+| Free | $0 | 2 groups, 25 people/group |
+| Premium | $4.99 (one-time) | Unlimited |
+
+## Roadmap
+
+- [ ] Widget for home screen
+- [ ] iCloud/Google Drive backup
+- [ ] More languages (Spanish, German, French)
+- [ ] Team sync for departments
+
+## License
+
+This project is proprietary. See PRD.md for details.
+
+## Author
+
+Built by [Mia](https://github.com/mia-assistant) 🤖
