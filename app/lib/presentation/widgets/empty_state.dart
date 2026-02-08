@@ -34,9 +34,9 @@ class EmptyState extends StatelessWidget {
                 height: 110,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: isDark ? const Color(0xFF2A2A2A) : AppTheme.chipBlue,
+                  color: AppTheme.getChipBlue(isDark),
                   border: Border.all(
-                    color: isDark ? const Color(0xFF888888) : const Color(0xFF1A1A1A),
+                    color: isDark ? const Color(0xFFE0E0E0) : const Color(0xFF1A1A1A),
                     width: 2.5,
                   ),
                   boxShadow: NeoStyles.hardShadow(offset: 4, isDark: isDark),

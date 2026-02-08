@@ -140,7 +140,7 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen> {
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(7),
                   border: Border.all(
-                    color: isDark ? const Color(0xFF888888) : const Color(0xFF1A1A1A),
+                    color: isDark ? const Color(0xFFE0E0E0) : const Color(0xFF1A1A1A),
                     width: 2,
                   ),
                 ),
@@ -222,7 +222,7 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen> {
                             vertical: 12,
                           ),
                           decoration: NeoStyles.chipDecoration(
-                            backgroundColor: isDark ? const Color(0xFF2A2A2A) : AppTheme.chipBlue,
+                            backgroundColor: AppTheme.getChipBlue(isDark),
                             isDark: isDark,
                             borderRadius: 14,
                             shadowOffset: 2,
@@ -349,7 +349,7 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen> {
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(CardStyles.smallBorderRadius),
                         border: Border.all(
-                          color: isDark ? const Color(0xFF888888) : const Color(0xFF1A1A1A),
+                          color: isDark ? const Color(0xFFE0E0E0) : const Color(0xFF1A1A1A),
                           width: 2,
                         ),
                       ),
@@ -381,10 +381,10 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen> {
                           Container(
                             padding: const EdgeInsets.all(Spacing.lg),
                             decoration: BoxDecoration(
-                              color: isDark ? const Color(0xFF2A2A2A) : AppTheme.chipBlue,
+                              color: AppTheme.getChipBlue(isDark),
                               shape: BoxShape.circle,
                               border: Border.all(
-                                color: isDark ? const Color(0xFF888888) : const Color(0xFF1A1A1A),
+                                color: isDark ? const Color(0xFFE0E0E0) : const Color(0xFF1A1A1A),
                                 width: 2,
                               ),
                             ),
@@ -447,7 +447,7 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen> {
                       vertical: Spacing.md,
                     ),
                     decoration: NeoStyles.chipDecoration(
-                      backgroundColor: isDark ? const Color(0xFF2A2A2A) : AppTheme.chipYellow,
+                      backgroundColor: AppTheme.getChipYellow(isDark),
                       isDark: isDark,
                       borderRadius: CardStyles.smallBorderRadius,
                       shadowOffset: 2,
@@ -515,9 +515,9 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen> {
                 height: 110,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: isDark ? const Color(0xFF2A2A2A) : AppTheme.chipGreen,
+                  color: AppTheme.getChipGreen(isDark),
                   border: Border.all(
-                    color: isDark ? const Color(0xFF888888) : const Color(0xFF1A1A1A),
+                    color: isDark ? const Color(0xFFE0E0E0) : const Color(0xFF1A1A1A),
                     width: 3,
                   ),
                   boxShadow: NeoStyles.hardShadow(offset: 4, isDark: isDark),
@@ -635,9 +635,11 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen> {
                 height: 100,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: isDark ? const Color(0xFF2A2A2A) : (isGreat ? AppTheme.chipYellow : AppTheme.chipBlue),
+                  color: isDark 
+                      ? (isGreat ? AppTheme.chipYellowDark : AppTheme.chipBlueDark) 
+                      : (isGreat ? AppTheme.chipYellow : AppTheme.chipBlue),
                   border: Border.all(
-                    color: isDark ? const Color(0xFF888888) : const Color(0xFF1A1A1A),
+                    color: isDark ? const Color(0xFFE0E0E0) : const Color(0xFF1A1A1A),
                     width: 3,
                   ),
                   boxShadow: NeoStyles.hardShadow(offset: 4, isDark: isDark),
@@ -726,10 +728,17 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen> {
   Widget _buildStatCard(BuildContext context, String value, String label, IconData icon, Color chipBg) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     
+    // Get the dark mode version of the chip color
+    Color darkChipBg = const Color(0xFF1E1E1E);
+    if (chipBg == AppTheme.chipBlue) darkChipBg = AppTheme.chipBlueDark;
+    if (chipBg == AppTheme.chipGreen) darkChipBg = AppTheme.chipGreenDark;
+    if (chipBg == AppTheme.chipYellow) darkChipBg = AppTheme.chipYellowDark;
+    if (chipBg == AppTheme.chipPink) darkChipBg = AppTheme.chipPinkDark;
+    
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: Spacing.lg, vertical: Spacing.md),
       decoration: NeoStyles.chipDecoration(
-        backgroundColor: isDark ? const Color(0xFF1E1E1E) : chipBg,
+        backgroundColor: isDark ? darkChipBg : chipBg,
         isDark: isDark,
         borderRadius: CardStyles.smallBorderRadius,
         shadowOffset: 3,

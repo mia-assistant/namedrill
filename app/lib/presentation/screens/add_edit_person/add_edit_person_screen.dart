@@ -106,7 +106,7 @@ class _AddEditPersonScreenState extends ConsumerState<AddEditPersonScreen> {
                             color: Theme.of(context).colorScheme.primary,
                             shape: BoxShape.circle,
                             border: Border.all(
-                              color: isDark ? const Color(0xFF888888) : const Color(0xFF1A1A1A),
+                              color: isDark ? const Color(0xFFE0E0E0) : const Color(0xFF1A1A1A),
                               width: 2,
                             ),
                             boxShadow: NeoStyles.hardShadow(offset: 2, isDark: isDark),

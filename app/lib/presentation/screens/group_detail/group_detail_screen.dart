@@ -53,7 +53,7 @@ class GroupDetailScreen extends ConsumerWidget {
                 color: groupColor,
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: isDark ? const Color(0xFF888888) : const Color(0xFF1A1A1A),
+                  color: isDark ? const Color(0xFFE0E0E0) : const Color(0xFF1A1A1A),
                   width: 2,
                 ),
               ),
@@ -219,7 +219,7 @@ class GroupDetailScreen extends ConsumerWidget {
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                       decoration: NeoStyles.chipDecoration(
-                        backgroundColor: isDark ? const Color(0xFF2A2A2A) : AppTheme.chipYellow,
+                        backgroundColor: AppTheme.getChipYellow(isDark),
                         isDark: isDark,
                         borderRadius: 12,
                         shadowOffset: 2,
@@ -262,7 +262,7 @@ class GroupDetailScreen extends ConsumerWidget {
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                         decoration: NeoStyles.chipDecoration(
-                          backgroundColor: isDark ? const Color(0xFF2A2A2A) : AppTheme.chipBlue,
+                          backgroundColor: AppTheme.getChipBlue(isDark),
                           isDark: isDark,
                           borderRadius: 8,
                           shadowOffset: 2,
@@ -433,10 +433,17 @@ class GroupDetailScreen extends ConsumerWidget {
   Widget _buildStatChip(BuildContext context, String value, String label, IconData icon, Color color, Color chipBg) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     
+    // Get the dark mode version of the chip color
+    Color darkChipBg = const Color(0xFF2A2A2A);
+    if (chipBg == AppTheme.chipBlue) darkChipBg = AppTheme.chipBlueDark;
+    if (chipBg == AppTheme.chipGreen) darkChipBg = AppTheme.chipGreenDark;
+    if (chipBg == AppTheme.chipYellow) darkChipBg = AppTheme.chipYellowDark;
+    if (chipBg == AppTheme.chipPink) darkChipBg = AppTheme.chipPinkDark;
+    
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: NeoStyles.chipDecoration(
-        backgroundColor: isDark ? const Color(0xFF2A2A2A) : chipBg,
+        backgroundColor: isDark ? darkChipBg : chipBg,
         isDark: isDark,
         borderRadius: 12,
         shadowOffset: 2,

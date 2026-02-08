@@ -374,7 +374,7 @@ class SettingsScreen extends ConsumerWidget {
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
-                      color: isDark ? const Color(0xFF888888) : const Color(0xFF1A1A1A),
+                      color: isDark ? const Color(0xFFE0E0E0) : const Color(0xFF1A1A1A),
                       width: 2,
                     ),
                   ),

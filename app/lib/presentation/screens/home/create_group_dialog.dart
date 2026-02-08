@@ -75,7 +75,7 @@ class _CreateGroupDialogState extends ConsumerState<CreateGroupDialog> {
                       color: color,
                       shape: BoxShape.circle,
                       border: Border.all(
-                        color: isDark ? const Color(0xFF888888) : const Color(0xFF1A1A1A),
+                        color: isDark ? const Color(0xFFE0E0E0) : const Color(0xFF1A1A1A),
                         width: isSelected ? 3 : 2,
                       ),
                       boxShadow: isSelected

@@ -18,7 +18,7 @@ class Spacing {
 
 /// Neo-brutalism border color constant
 const Color _neoBorderLight = Color(0xFF1A1A1A);
-const Color _neoBorderDark = Color(0xFF888888);
+const Color _neoBorderDark = Color(0xFFE0E0E0);
 
 /// Neo-brutalism reusable styles
 class NeoStyles {
@@ -34,7 +34,7 @@ class NeoStyles {
   static List<BoxShadow> hardShadow({double offset = 4, Color? color, bool isDark = false}) {
     return [
       BoxShadow(
-        color: color ?? (isDark ? const Color(0xFF555555) : Colors.black),
+        color: color ?? (isDark ? const Color(0xFFAAAAAA) : Colors.black),
         offset: Offset(offset, offset),
         blurRadius: 0,
       ),
@@ -130,11 +130,23 @@ class AppTheme {
   static const Color lightSurface = Colors.white;
   static const Color lightCardBackground = Colors.white;
 
-  // Stat chip colors
+  // Stat chip colors (light mode)
   static const Color chipYellow = Color(0xFFFEF3C7);
   static const Color chipPink = Color(0xFFFCE7F3);
   static const Color chipBlue = Color(0xFFDBEAFE);
   static const Color chipGreen = Color(0xFFD1FAE5);
+
+  // Stat chip colors (dark mode) - deeper/richer variants
+  static const Color chipYellowDark = Color(0xFF4A4520);
+  static const Color chipPinkDark = Color(0xFF4A2040);
+  static const Color chipBlueDark = Color(0xFF1E3A5F);
+  static const Color chipGreenDark = Color(0xFF1A4A3A);
+
+  // Helper to get chip color based on dark mode
+  static Color getChipYellow(bool isDark) => isDark ? chipYellowDark : chipYellow;
+  static Color getChipPink(bool isDark) => isDark ? chipPinkDark : chipPink;
+  static Color getChipBlue(bool isDark) => isDark ? chipBlueDark : chipBlue;
+  static Color getChipGreen(bool isDark) => isDark ? chipGreenDark : chipGreen;
 
   // Group colors (for user selection)
   static const List<Color> groupColors = [

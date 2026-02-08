@@ -84,7 +84,7 @@ class GroupCard extends ConsumerWidget {
                       data: (count) => Container(
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                         decoration: NeoStyles.chipDecoration(
-                          backgroundColor: isDark ? const Color(0xFF2A2A2A) : AppTheme.chipYellow,
+                          backgroundColor: AppTheme.getChipYellow(isDark),
                           isDark: isDark,
                           borderRadius: 8,
                           shadowOffset: 2,
