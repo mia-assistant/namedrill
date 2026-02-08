@@ -79,20 +79,25 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          // Neo-brutalist circle
+          // Neo-brutalist logo container
           Container(
             width: 140,
             height: 140,
             decoration: BoxDecoration(
               color: Colors.white,
-              shape: BoxShape.circle,
+              borderRadius: BorderRadius.circular(24),
               border: Border.all(color: const Color(0xFF1A1A1A), width: 3),
               boxShadow: const [
                 BoxShadow(color: Colors.black, offset: Offset(4, 4), blurRadius: 0),
               ],
             ),
-            child: const Center(
-              child: Text('🧠', style: TextStyle(fontSize: 70)),
+            clipBehavior: Clip.antiAlias,
+            child: Padding(
+              padding: const EdgeInsets.all(8),
+              child: Image.asset(
+                'assets/images/logo.png',
+                fit: BoxFit.contain,
+              ),
             ),
           ),
           const SizedBox(height: 48),

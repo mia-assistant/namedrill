@@ -27,17 +27,18 @@ class HomeScreen extends ConsumerWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Container(
-              padding: const EdgeInsets.all(8),
+              width: 40,
+              height: 40,
               decoration: NeoStyles.cardDecoration(
                 isDark: isDark,
-                backgroundColor: AppTheme.primaryColor,
-                borderRadius: 12,
+                borderRadius: 10,
                 shadowOffset: 3,
+                borderWidth: 2,
               ),
-              child: const Icon(
-                Icons.school,
-                color: Colors.white,
-                size: 20,
+              clipBehavior: Clip.antiAlias,
+              child: Image.asset(
+                'assets/images/logo.png',
+                fit: BoxFit.cover,
               ),
             ),
             const SizedBox(width: 12),
