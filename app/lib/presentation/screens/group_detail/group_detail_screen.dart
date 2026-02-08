@@ -485,7 +485,11 @@ class GroupDetailScreen extends ConsumerWidget {
             person: person,
           ),
         ),
-      ).then((_) => ref.read(peopleNotifierProvider(group.id).notifier).loadPeople()),
+      ).then((_) {
+        ref.read(peopleNotifierProvider(group.id).notifier).loadPeople();
+        ref.invalidate(previewPeopleProvider(group.id));
+        ref.invalidate(personCountProvider(group.id));
+      }),
       child: Column(
         children: [
           Expanded(
@@ -550,7 +554,11 @@ class GroupDetailScreen extends ConsumerWidget {
         MaterialPageRoute(
           builder: (_) => AddEditPersonScreen(groupId: group.id),
         ),
-      ).then((_) => ref.read(peopleNotifierProvider(group.id).notifier).loadPeople());
+      ).then((_) {
+        ref.read(peopleNotifierProvider(group.id).notifier).loadPeople();
+        ref.invalidate(previewPeopleProvider(group.id));
+        ref.invalidate(personCountProvider(group.id));
+      });
     }
   }
 

@@ -5,6 +5,7 @@ import 'package:image_picker/image_picker.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../data/models/person_model.dart';
+import '../../providers/app_providers.dart';
 import '../group_detail/group_detail_screen.dart';
 
 class AddEditPersonScreen extends ConsumerStatefulWidget {
@@ -315,6 +316,10 @@ class _AddEditPersonScreenState extends ConsumerState<AddEditPersonScreen> {
         );
       }
 
+      // Invalidate preview provider so group card refreshes
+      ref.invalidate(previewPeopleProvider(widget.groupId));
+      ref.invalidate(personCountProvider(widget.groupId));
+
       if (mounted) {
         Navigator.pop(context);
       }
@@ -349,6 +354,9 @@ class _AddEditPersonScreenState extends ConsumerState<AddEditPersonScreen> {
               Navigator.pop(context);
               await ref.read(peopleNotifierProvider(widget.groupId).notifier)
                   .deletePerson(widget.person!.id);
+              // Invalidate preview provider so group card refreshes
+              ref.invalidate(previewPeopleProvider(widget.groupId));
+              ref.invalidate(personCountProvider(widget.groupId));
               if (mounted) {
                 Navigator.pop(context);
               }
