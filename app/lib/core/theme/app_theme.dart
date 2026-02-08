@@ -273,7 +273,7 @@ class AppTheme {
           color: const Color(0xFF1A1A1A),
         ),
       ),
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         elevation: 0,
         color: lightCardBackground,
         shape: RoundedRectangleBorder(
@@ -363,7 +363,7 @@ class AppTheme {
           side: const BorderSide(color: _neoBorderLight, width: 2),
         ),
       ),
-      dialogTheme: DialogTheme(
+      dialogTheme: DialogThemeData(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
           side: const BorderSide(color: _neoBorderLight, width: 2.5),
@@ -400,7 +400,7 @@ class AppTheme {
           color: Colors.white,
         ),
       ),
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         elevation: 0,
         color: const Color(0xFF1E1E1E),
         shape: RoundedRectangleBorder(
@@ -491,7 +491,7 @@ class AppTheme {
           side: const BorderSide(color: _neoBorderDark, width: 2),
         ),
       ),
-      dialogTheme: DialogTheme(
+      dialogTheme: DialogThemeData(
         backgroundColor: const Color(0xFF1E1E1E),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
