@@ -19,6 +19,7 @@ class HomeScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final groupsAsync = ref.watch(groupsProvider);
     final isPremium = ref.watch(isPremiumProvider);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
       appBar: AppBar(
@@ -26,20 +27,17 @@ class HomeScreen extends ConsumerWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Container(
-              padding: const EdgeInsets.all(6),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    AppTheme.primaryColor,
-                    AppTheme.primaryColor.withOpacity(0.8),
-                  ],
-                ),
-                borderRadius: BorderRadius.circular(10),
+              padding: const EdgeInsets.all(8),
+              decoration: NeoStyles.cardDecoration(
+                isDark: isDark,
+                backgroundColor: AppTheme.primaryColor,
+                borderRadius: 12,
+                shadowOffset: 3,
               ),
               child: const Icon(
                 Icons.school,
                 color: Colors.white,
-                size: 18,
+                size: 20,
               ),
             ),
             const SizedBox(width: 12),
@@ -54,9 +52,11 @@ class HomeScreen extends ConsumerWidget {
             child: IconButton(
               icon: Container(
                 padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                  borderRadius: BorderRadius.circular(12),
+                decoration: NeoStyles.cardDecoration(
+                  isDark: isDark,
+                  borderRadius: 12,
+                  shadowOffset: 2,
+                  borderWidth: 2,
                 ),
                 child: const Icon(Icons.settings_outlined, size: 20),
               ),
@@ -94,10 +94,27 @@ class HomeScreen extends ConsumerWidget {
       floatingActionButton: Semantics(
         label: 'New Group',
         button: true,
-        child: FloatingActionButton.extended(
-          onPressed: () => _showCreateGroupDialog(context, ref),
-          icon: const Icon(Icons.add),
-          label: const Text('New Group'),
+        child: Container(
+          decoration: NeoStyles.buttonDecoration(
+            backgroundColor: AppTheme.primaryColor,
+            isDark: isDark,
+            borderRadius: 16,
+            shadowOffset: 4,
+          ),
+          child: FloatingActionButton.extended(
+            onPressed: () => _showCreateGroupDialog(context, ref),
+            icon: const Icon(Icons.add, size: 22),
+            label: Text(
+              'New Group',
+              style: TextStyle(fontWeight: FontWeight.w700, fontSize: 15),
+            ),
+            backgroundColor: Colors.transparent,
+            foregroundColor: Colors.white,
+            elevation: 0,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+          ),
         ),
       ),
     );
@@ -155,15 +172,18 @@ class HomeScreen extends ConsumerWidget {
                       horizontal: Spacing.sm + 4,
                       vertical: Spacing.xs + 2,
                     ),
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                      borderRadius: BorderRadius.circular(Spacing.sm),
+                    decoration: NeoStyles.chipDecoration(
+                      backgroundColor: Theme.of(context).brightness == Brightness.dark
+                          ? const Color(0xFF2A2A2A)
+                          : AppTheme.chipBlue,
+                      isDark: Theme.of(context).brightness == Brightness.dark,
+                      shadowOffset: 2,
+                      borderWidth: 2,
                     ),
                     child: Text(
                       '${groups.length}${isPremium ? '' : '/${AppConstants.maxFreeGroups}'}',
                       style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                        color: Theme.of(context).colorScheme.outline,
-                        fontWeight: FontWeight.w600,
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
                   ),
@@ -180,7 +200,7 @@ class HomeScreen extends ConsumerWidget {
                 (context, index) {
                   final group = groups[index];
                   return Padding(
-                    padding: const EdgeInsets.only(bottom: Spacing.md),
+                    padding: const EdgeInsets.only(bottom: Spacing.md + 4),
                     child: GroupCard(
                       group: group,
                       onTap: () => Navigator.push(

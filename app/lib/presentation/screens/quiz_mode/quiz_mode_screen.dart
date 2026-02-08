@@ -11,6 +11,14 @@ import '../../../data/models/person_model.dart';
 import '../../../data/models/quiz_score_model.dart';
 import '../../providers/app_providers.dart';
 
+// Option button colors for neo-brutalist style
+const _optionColors = [
+  Color(0xFFDBEAFE), // soft blue
+  Color(0xFFFCE7F3), // soft pink
+  Color(0xFFFEF3C7), // soft yellow
+  Color(0xFFD1FAE5), // soft green
+];
+
 class QuizModeScreen extends ConsumerStatefulWidget {
   final GroupModel group;
 
@@ -195,6 +203,8 @@ class _QuizModeScreenState extends ConsumerState<QuizModeScreen> {
       return _buildResultsScreen();
     }
 
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
@@ -216,25 +226,38 @@ class _QuizModeScreenState extends ConsumerState<QuizModeScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            // Timer progress bar
+            // Timer progress bar — chunky with border
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(4),
-                child: LinearProgressIndicator(
-                  value: _timeRemaining / AppConstants.quizDurationSeconds,
-                  backgroundColor: groupColor.withOpacity(0.2),
-                  valueColor: AlwaysStoppedAnimation<Color>(
-                    _timeRemaining <= 10 ? AppTheme.errorColor : groupColor,
+              child: Container(
+                height: 14,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(7),
+                  border: Border.all(
+                    color: isDark ? const Color(0xFF888888) : const Color(0xFF1A1A1A),
+                    width: 2,
                   ),
-                  minHeight: 6,
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(1),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(5),
+                    child: LinearProgressIndicator(
+                      value: _timeRemaining / AppConstants.quizDurationSeconds,
+                      backgroundColor: isDark ? Colors.grey[800] : Colors.grey[100],
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        _timeRemaining <= 10 ? AppTheme.errorColor : groupColor,
+                      ),
+                      minHeight: 10,
+                    ),
+                  ),
                 ),
               ),
             ),
             
             const SizedBox(height: Spacing.md),
 
-            // Photo card - slightly larger
+            // Photo card
             Expanded(
               flex: 5,
               child: Semantics(
@@ -249,7 +272,7 @@ class _QuizModeScreenState extends ConsumerState<QuizModeScreen> {
             
             const SizedBox(height: Spacing.md),
 
-            // Options - adjusted height
+            // Options — neo-brutalist with different colors
             Semantics(
               label: 'Quiz Options',
               container: true,
@@ -259,17 +282,17 @@ class _QuizModeScreenState extends ConsumerState<QuizModeScreen> {
                   children: [
                     Row(
                       children: [
-                        Expanded(child: _buildOptionButton(_options[0])),
+                        Expanded(child: _buildOptionButton(_options[0], 0)),
                         const SizedBox(width: 12),
-                        Expanded(child: _buildOptionButton(_options[1])),
+                        Expanded(child: _buildOptionButton(_options[1], 1)),
                       ],
                     ),
                     const SizedBox(height: 12),
                     Row(
                       children: [
-                        Expanded(child: _buildOptionButton(_options[2])),
+                        Expanded(child: _buildOptionButton(_options[2], 2)),
                         const SizedBox(width: 12),
-                        Expanded(child: _buildOptionButton(_options[3])),
+                        Expanded(child: _buildOptionButton(_options[3], 3)),
                       ],
                     ),
                   ],
@@ -283,22 +306,25 @@ class _QuizModeScreenState extends ConsumerState<QuizModeScreen> {
   }
 
   Widget _buildScoreChip() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-      decoration: BoxDecoration(
-        color: AppTheme.primaryColor.withOpacity(0.15),
-        borderRadius: BorderRadius.circular(20),
+      decoration: NeoStyles.chipDecoration(
+        backgroundColor: isDark ? const Color(0xFF2A2A2A) : AppTheme.chipYellow,
+        isDark: isDark,
+        borderRadius: 14,
+        shadowOffset: 2,
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.star, size: 18, color: Colors.amber[700]),
+          Icon(Icons.star, size: 20, color: Colors.amber[700]),
           const SizedBox(width: 6),
           Text(
             '$_score',
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: AppTheme.primaryColor,
+                  fontWeight: FontWeight.w800,
                 ),
           ),
         ],
@@ -310,16 +336,12 @@ class _QuizModeScreenState extends ConsumerState<QuizModeScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     
     return Container(
-      decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
-        borderRadius: BorderRadius.circular(CardStyles.borderRadius),
-        border: Border.all(
-          color: isDark ? Colors.grey[800]! : Colors.grey[200]!,
-        ),
-        boxShadow: CardStyles.softShadow(groupColor),
+      decoration: NeoStyles.cardDecoration(
+        isDark: isDark,
+        shadowOffset: 5,
       ),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(CardStyles.borderRadius),
+        borderRadius: BorderRadius.circular(CardStyles.borderRadius - 2),
         child: Padding(
           padding: const EdgeInsets.all(Spacing.md),
           child: ClipRRect(
@@ -348,19 +370,20 @@ class _QuizModeScreenState extends ConsumerState<QuizModeScreen> {
     final seconds = _timeRemaining % 60;
     final timeText = '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
     final isLow = _timeRemaining <= 10;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Semantics(
       label: 'Time remaining $timeText',
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-        decoration: BoxDecoration(
-          color: isLow
+        decoration: NeoStyles.chipDecoration(
+          backgroundColor: isLow
               ? AppTheme.errorColor.withOpacity(0.15)
-              : Theme.of(context).colorScheme.surfaceContainerHighest,
-          borderRadius: BorderRadius.circular(20),
-          border: isLow
-              ? Border.all(color: AppTheme.errorColor.withOpacity(0.3))
-              : null,
+              : (isDark ? const Color(0xFF2A2A2A) : AppTheme.chipPink),
+          isDark: isDark,
+          borderRadius: 14,
+          shadowOffset: 2,
+          borderWidth: isLow ? 2.5 : 2,
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -374,7 +397,7 @@ class _QuizModeScreenState extends ConsumerState<QuizModeScreen> {
             Text(
               timeText,
               style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
+                    fontWeight: FontWeight.w800,
                     color: isLow ? AppTheme.errorColor : null,
                   ),
             ),
@@ -384,10 +407,12 @@ class _QuizModeScreenState extends ConsumerState<QuizModeScreen> {
     );
   }
 
-  Widget _buildOptionButton(String name) {
-    Color? backgroundColor;
+  Widget _buildOptionButton(String name, int index) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    Color backgroundColor;
     Color? foregroundColor;
-    Color? borderColor;
+    Color borderColor = isDark ? const Color(0xFF888888) : const Color(0xFF1A1A1A);
+    double borderWidth = 2.5;
 
     if (_showingResult) {
       final isCorrect = name == _currentPerson!.name;
@@ -396,47 +421,48 @@ class _QuizModeScreenState extends ConsumerState<QuizModeScreen> {
       if (isCorrect) {
         backgroundColor = AppTheme.successColor;
         foregroundColor = Colors.white;
-        borderColor = AppTheme.successColor;
+        borderWidth = 3;
       } else if (isSelected) {
         backgroundColor = AppTheme.errorColor;
         foregroundColor = Colors.white;
-        borderColor = AppTheme.errorColor;
+        borderWidth = 3;
+      } else {
+        backgroundColor = isDark ? const Color(0xFF1E1E1E) : _optionColors[index % _optionColors.length];
       }
+    } else {
+      backgroundColor = isDark ? const Color(0xFF1E1E1E) : _optionColors[index % _optionColors.length];
     }
 
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    
     return Semantics(
       label: 'Answer option $name',
       button: true,
       child: SizedBox(
-        height: 56,
+        height: 60,
         child: Material(
-          color: backgroundColor ?? (isDark ? const Color(0xFF1E1E1E) : Colors.white),
-          borderRadius: BorderRadius.circular(CardStyles.smallBorderRadius),
+          color: Colors.transparent,
           child: InkWell(
             onTap: _showingResult ? null : () => _selectAnswer(name),
             borderRadius: BorderRadius.circular(CardStyles.smallBorderRadius),
             child: Container(
               decoration: BoxDecoration(
+                color: backgroundColor,
                 borderRadius: BorderRadius.circular(CardStyles.smallBorderRadius),
                 border: Border.all(
-                  color: borderColor ?? 
-                      (isDark ? Colors.grey[700]! : Colors.grey[200]!),
-                  width: _showingResult ? 2 : 1,
+                  color: borderColor,
+                  width: borderWidth,
                 ),
                 boxShadow: _showingResult
                     ? null
-                    : CardStyles.defaultShadow,
+                    : NeoStyles.hardShadow(offset: 3, isDark: isDark),
               ),
               child: Center(
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: Spacing.lg),
+                  padding: const EdgeInsets.symmetric(horizontal: Spacing.md),
                   child: Text(
                     name,
                     style: TextStyle(
                       fontSize: 15,
-                      fontWeight: FontWeight.w600,
+                      fontWeight: FontWeight.w700,
                       color: foregroundColor ?? Theme.of(context).colorScheme.onSurface,
                     ),
                     maxLines: 1,
@@ -454,6 +480,7 @@ class _QuizModeScreenState extends ConsumerState<QuizModeScreen> {
 
   Widget _buildResultsScreen() {
     final isNewHighScore = _highScore != null && _score == _highScore && _score > 0;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
       body: SafeArea(
@@ -462,32 +489,24 @@ class _QuizModeScreenState extends ConsumerState<QuizModeScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // Trophy or check icon
-              Stack(
-                alignment: Alignment.center,
-                children: [
-                  Container(
-                    width: 110,
-                    height: 110,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: (isNewHighScore ? Colors.amber : groupColor).withOpacity(0.08),
-                    ),
+              // Trophy — neo-brutalist bordered circle
+              Container(
+                width: 100,
+                height: 100,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: isDark ? const Color(0xFF2A2A2A) : AppTheme.chipYellow,
+                  border: Border.all(
+                    color: isDark ? const Color(0xFF888888) : const Color(0xFF1A1A1A),
+                    width: 3,
                   ),
-                  Container(
-                    width: 85,
-                    height: 85,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: (isNewHighScore ? Colors.amber : groupColor).withOpacity(0.12),
-                    ),
-                  ),
-                  Icon(
-                    isNewHighScore ? Icons.emoji_events : Icons.check_circle,
-                    size: 50,
-                    color: isNewHighScore ? Colors.amber : groupColor,
-                  ),
-                ],
+                  boxShadow: NeoStyles.hardShadow(offset: 4, isDark: isDark),
+                ),
+                child: Icon(
+                  isNewHighScore ? Icons.emoji_events : Icons.check_circle,
+                  size: 50,
+                  color: isNewHighScore ? Colors.amber : groupColor,
+                ),
               ),
               const SizedBox(height: 24),
                 
@@ -496,15 +515,16 @@ class _QuizModeScreenState extends ConsumerState<QuizModeScreen> {
                     label: 'New High Score',
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                      decoration: BoxDecoration(
-                        color: Colors.amber.withOpacity(0.15),
-                        borderRadius: BorderRadius.circular(20),
+                      decoration: NeoStyles.chipDecoration(
+                        backgroundColor: AppTheme.chipYellow,
+                        isDark: isDark,
+                        shadowOffset: 2,
                       ),
                       child: Text(
                         '🎉 New High Score!',
                         style: Theme.of(context).textTheme.titleMedium?.copyWith(
                               color: Colors.amber[800],
-                              fontWeight: FontWeight.bold,
+                              fontWeight: FontWeight.w800,
                             ),
                       ),
                     ),
@@ -517,7 +537,7 @@ class _QuizModeScreenState extends ConsumerState<QuizModeScreen> {
                   child: Text(
                     _score > 0 ? 'Nice work!' : 'Keep practicing!',
                     style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                          fontWeight: FontWeight.bold,
+                          fontWeight: FontWeight.w800,
                         ),
                   ),
                 ),
@@ -531,9 +551,9 @@ class _QuizModeScreenState extends ConsumerState<QuizModeScreen> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      _buildStatCard('$_score', 'Score', Icons.star, Colors.amber),
-                      _buildStatCard('${_highScore ?? 0}', 'High Score', Icons.emoji_events, groupColor),
-                      _buildStatCard('$_streak', 'Streak', Icons.local_fire_department, Colors.orange),
+                      _buildStatCard('$_score', 'Score', Icons.star, Colors.amber, AppTheme.chipYellow),
+                      _buildStatCard('${_highScore ?? 0}', 'High Score', Icons.emoji_events, groupColor, AppTheme.chipBlue),
+                      _buildStatCard('$_streak', 'Streak', Icons.local_fire_department, Colors.orange, AppTheme.chipPink),
                     ],
                   ),
                 ),
@@ -543,7 +563,7 @@ class _QuizModeScreenState extends ConsumerState<QuizModeScreen> {
                   Text(
                     'Missed:',
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
+                          fontWeight: FontWeight.w700,
                         ),
                   ),
                   const SizedBox(height: 16),
@@ -553,18 +573,19 @@ class _QuizModeScreenState extends ConsumerState<QuizModeScreen> {
                     alignment: WrapAlignment.center,
                     children: _missedPeople.take(5).map((person) {
                       return Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(
-                            color: Theme.of(context).colorScheme.outline.withOpacity(0.2),
-                          ),
+                        decoration: NeoStyles.chipDecoration(
+                          backgroundColor: isDark ? const Color(0xFF2A2A2A) : Colors.white,
+                          isDark: isDark,
+                          borderRadius: 20,
+                          shadowOffset: 2,
+                          borderWidth: 2,
                         ),
                         child: Chip(
                           avatar: CircleAvatar(
                             backgroundImage: FileImage(File(person.photoPath)),
                             onBackgroundImageError: (_, __) {},
                           ),
-                          label: Text(person.name),
+                          label: Text(person.name, style: const TextStyle(fontWeight: FontWeight.w600)),
                           backgroundColor: Colors.transparent,
                           side: BorderSide.none,
                         ),
@@ -623,31 +644,32 @@ class _QuizModeScreenState extends ConsumerState<QuizModeScreen> {
       );
   }
 
-  Widget _buildStatCard(String value, String label, IconData icon, Color color) {
+  Widget _buildStatCard(String value, String label, IconData icon, Color color, Color chipBg) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: Spacing.lg, vertical: Spacing.md),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
-        borderRadius: BorderRadius.circular(CardStyles.smallBorderRadius),
-        border: Border.all(
-          color: Theme.of(context).colorScheme.outline.withOpacity(0.1),
-        ),
-        boxShadow: CardStyles.defaultShadow,
+      decoration: NeoStyles.chipDecoration(
+        backgroundColor: isDark ? const Color(0xFF1E1E1E) : chipBg,
+        isDark: isDark,
+        borderRadius: CardStyles.smallBorderRadius,
+        shadowOffset: 3,
       ),
       child: Column(
         children: [
-          Icon(icon, size: 22, color: color),
+          Icon(icon, size: 24, color: color),
           const SizedBox(height: Spacing.xs),
           Text(
             value,
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
+                  fontWeight: FontWeight.w800,
                 ),
           ),
           Text(
             label,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: Theme.of(context).colorScheme.outline,
+                  fontWeight: FontWeight.w600,
                 ),
           ),
         ],

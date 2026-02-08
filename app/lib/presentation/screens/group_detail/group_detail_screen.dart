@@ -36,6 +36,7 @@ class GroupDetailScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final peopleAsync = ref.watch(peopleNotifierProvider(group.id));
     final groupStatsAsync = ref.watch(groupStatsProvider(group.id));
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
       extendBodyBehindAppBar: true,
@@ -46,17 +47,15 @@ class GroupDetailScreen extends ConsumerWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Container(
-              width: 10,
-              height: 10,
+              width: 14,
+              height: 14,
               decoration: BoxDecoration(
                 color: groupColor,
                 shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: groupColor.withOpacity(0.4),
-                    blurRadius: 4,
-                  ),
-                ],
+                border: Border.all(
+                  color: isDark ? const Color(0xFF888888) : const Color(0xFF1A1A1A),
+                  width: 2,
+                ),
               ),
             ),
             const SizedBox(width: 10),
@@ -105,10 +104,23 @@ class GroupDetailScreen extends ConsumerWidget {
           data: (people) => _buildContent(context, ref, people, groupStatsAsync),
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => _addPerson(context, ref),
-        backgroundColor: groupColor,
-        child: const Icon(Icons.person_add),
+      floatingActionButton: Container(
+        decoration: NeoStyles.buttonDecoration(
+          backgroundColor: groupColor,
+          isDark: isDark,
+          borderRadius: 16,
+          shadowOffset: 4,
+        ),
+        child: FloatingActionButton(
+          onPressed: () => _addPerson(context, ref),
+          backgroundColor: Colors.transparent,
+          foregroundColor: Colors.white,
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: const Icon(Icons.person_add),
+        ),
       ),
     );
   }
@@ -119,6 +131,8 @@ class GroupDetailScreen extends ConsumerWidget {
     List<PersonModel> people,
     AsyncValue<Map<String, dynamic>> statsAsync,
   ) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
     if (people.isEmpty) {
       return SafeArea(
         child: EmptyState(
@@ -153,7 +167,7 @@ class GroupDetailScreen extends ConsumerWidget {
                 _buildStatsCard(context, statsAsync, people.length),
                 const SizedBox(height: 16),
                 
-                // Action buttons
+                // Action buttons — neo-brutalist
                 Row(
                   children: [
                     Expanded(
@@ -204,9 +218,12 @@ class GroupDetailScreen extends ConsumerWidget {
                     padding: const EdgeInsets.only(top: 12),
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                      decoration: BoxDecoration(
-                        color: groupColor.withOpacity(0.08),
-                        borderRadius: BorderRadius.circular(12),
+                      decoration: NeoStyles.chipDecoration(
+                        backgroundColor: isDark ? const Color(0xFF2A2A2A) : AppTheme.chipYellow,
+                        isDark: isDark,
+                        borderRadius: 12,
+                        shadowOffset: 2,
+                        borderWidth: 2,
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
@@ -222,7 +239,7 @@ class GroupDetailScreen extends ConsumerWidget {
                             'Add ${AppConstants.minPeopleForQuiz - people.length} more to unlock Quiz',
                             style: Theme.of(context).textTheme.bodySmall?.copyWith(
                                   color: groupColor,
-                                  fontWeight: FontWeight.w500,
+                                  fontWeight: FontWeight.w600,
                                 ),
                           ),
                         ],
@@ -239,15 +256,24 @@ class GroupDetailScreen extends ConsumerWidget {
                       Text(
                         'People',
                         style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.bold,
+                              fontWeight: FontWeight.w800,
                             ),
                       ),
-                      Text(
-                        '${people.length}',
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                              color: Theme.of(context).colorScheme.outline,
-                              fontWeight: FontWeight.w500,
-                            ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                        decoration: NeoStyles.chipDecoration(
+                          backgroundColor: isDark ? const Color(0xFF2A2A2A) : AppTheme.chipBlue,
+                          isDark: isDark,
+                          borderRadius: 8,
+                          shadowOffset: 2,
+                          borderWidth: 1.5,
+                        ),
+                        child: Text(
+                          '${people.length}',
+                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.w700,
+                              ),
+                        ),
                       ),
                     ],
                   ),
@@ -264,7 +290,7 @@ class GroupDetailScreen extends ConsumerWidget {
                 crossAxisCount: 3,
                 crossAxisSpacing: 16,
                 mainAxisSpacing: 20,
-                childAspectRatio: 0.8,
+                childAspectRatio: 0.75,
               ),
               itemCount: people.length,
               itemBuilder: (context, index) {
@@ -289,45 +315,82 @@ class GroupDetailScreen extends ConsumerWidget {
     
     if (isPrimary) {
       return Container(
-        decoration: BoxDecoration(
+        decoration: onPressed != null
+            ? NeoStyles.buttonDecoration(
+                backgroundColor: groupColor,
+                isDark: isDark,
+                borderRadius: 14,
+                shadowOffset: 3,
+              )
+            : null,
+        child: Material(
+          color: onPressed != null ? Colors.transparent : (isDark ? Colors.grey[800] : Colors.grey[300]),
           borderRadius: BorderRadius.circular(14),
-          boxShadow: onPressed != null
-              ? [
-                  BoxShadow(
-                    color: groupColor.withOpacity(0.3),
-                    blurRadius: 8,
-                    offset: const Offset(0, 3),
+          child: InkWell(
+            onTap: onPressed,
+            borderRadius: BorderRadius.circular(14),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(icon, color: onPressed != null ? Colors.white : Colors.grey, size: 20),
+                  const SizedBox(width: 8),
+                  Text(
+                    label,
+                    style: TextStyle(
+                      color: onPressed != null ? Colors.white : Colors.grey,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 15,
+                    ),
                   ),
-                ]
-              : null,
-        ),
-        child: ElevatedButton.icon(
-          onPressed: onPressed,
-          icon: Icon(icon),
-          label: Text(label),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: groupColor,
-            foregroundColor: Colors.white,
-            padding: const EdgeInsets.symmetric(vertical: 16),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(14),
+                ],
+              ),
             ),
           ),
         ),
       );
     } else {
-      return OutlinedButton.icon(
-        onPressed: onPressed,
-        icon: Icon(icon),
-        label: Text(label),
-        style: OutlinedButton.styleFrom(
-          foregroundColor: onPressed != null ? groupColor : Theme.of(context).disabledColor,
-          padding: const EdgeInsets.symmetric(vertical: 16),
-          shape: RoundedRectangleBorder(
+      return Container(
+        decoration: onPressed != null
+            ? NeoStyles.buttonDecoration(
+                backgroundColor: isDark ? const Color(0xFF1E1E1E) : AppTheme.chipPink,
+                isDark: isDark,
+                borderRadius: 14,
+                shadowOffset: 3,
+              )
+            : BoxDecoration(
+                color: isDark ? Colors.grey[800] : Colors.grey[200],
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(
+                  color: isDark ? Colors.grey[700]! : Colors.grey[300]!,
+                  width: 2,
+                ),
+              ),
+        child: Material(
+          color: Colors.transparent,
+          borderRadius: BorderRadius.circular(14),
+          child: InkWell(
+            onTap: onPressed,
             borderRadius: BorderRadius.circular(14),
-          ),
-          side: BorderSide(
-            color: onPressed != null ? groupColor : (isDark ? Colors.grey[700]! : Colors.grey[300]!),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(icon, color: onPressed != null ? groupColor : Theme.of(context).disabledColor, size: 20),
+                  const SizedBox(width: 8),
+                  Text(
+                    label,
+                    style: TextStyle(
+                      color: onPressed != null ? groupColor : Theme.of(context).disabledColor,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 15,
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
         ),
       );
@@ -343,19 +406,9 @@ class GroupDetailScreen extends ConsumerWidget {
     
     return Container(
       padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            groupColor.withOpacity(isDark ? 0.15 : 0.08),
-            groupColor.withOpacity(isDark ? 0.08 : 0.03),
-          ],
-        ),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: groupColor.withOpacity(0.15),
-        ),
+      decoration: NeoStyles.cardDecoration(
+        isDark: isDark,
+        shadowOffset: 4,
       ),
       child: statsAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
@@ -367,9 +420,9 @@ class GroupDetailScreen extends ConsumerWidget {
           return Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              _buildStatChip(context, '$totalPeople', 'Total', Icons.people, Colors.blue),
-              _buildStatChip(context, '$learned', 'Learned', Icons.check_circle, AppTheme.successColor),
-              _buildStatChip(context, '$percent%', 'Progress', Icons.trending_up, groupColor),
+              _buildStatChip(context, '$totalPeople', 'Total', Icons.people, Colors.blue, AppTheme.chipBlue),
+              _buildStatChip(context, '$learned', 'Learned', Icons.check_circle, AppTheme.successColor, AppTheme.chipGreen),
+              _buildStatChip(context, '$percent%', 'Progress', Icons.trending_up, groupColor, AppTheme.chipYellow),
             ],
           );
         },
@@ -377,26 +430,39 @@ class GroupDetailScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildStatChip(BuildContext context, String value, String label, IconData icon, Color color) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(icon, size: 24, color: color),
-        const SizedBox(height: 8),
-        Text(
-          value,
-          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-        ),
-        const SizedBox(height: 2),
-        Text(
-          label,
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Theme.of(context).colorScheme.outline,
-              ),
-        ),
-      ],
+  Widget _buildStatChip(BuildContext context, String value, String label, IconData icon, Color color, Color chipBg) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: NeoStyles.chipDecoration(
+        backgroundColor: isDark ? const Color(0xFF2A2A2A) : chipBg,
+        isDark: isDark,
+        borderRadius: 12,
+        shadowOffset: 2,
+        borderWidth: 1.5,
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 24, color: color),
+          const SizedBox(height: 6),
+          Text(
+            value,
+            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.w800,
+                ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            label,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: Theme.of(context).colorScheme.outline,
+                  fontWeight: FontWeight.w600,
+                ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -417,18 +483,14 @@ class GroupDetailScreen extends ConsumerWidget {
         children: [
           Expanded(
             child: Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(16),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.08),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
+              decoration: NeoStyles.cardDecoration(
+                isDark: isDark,
+                borderRadius: 14,
+                shadowOffset: 3,
+                borderWidth: 2.5,
               ),
               child: ClipRRect(
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(12),
                 child: Image.file(
                   File(person.photoPath),
                   fit: BoxFit.cover,
@@ -449,7 +511,7 @@ class GroupDetailScreen extends ConsumerWidget {
           Text(
             person.name,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w700,
                 ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,

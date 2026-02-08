@@ -8,6 +8,15 @@ import '../../../core/theme/app_theme.dart';
 import '../../providers/app_providers.dart';
 import '../home/home_screen.dart';
 
+// Solid background colors for neo-brutalist onboarding (no gradients)
+const _pageColors = [
+  Color(0xFF6366F1), // Indigo — Welcome
+  Color(0xFF0F2027), // Dark teal — How it works
+  Color(0xFFEC4899), // Pink — Camera
+  Color(0xFF3B82F6), // Blue — Reminders
+  Color(0xFF8B5CF6), // Violet — Paywall
+];
+
 class OnboardingScreen extends ConsumerStatefulWidget {
   const OnboardingScreen({super.key});
 
@@ -34,12 +43,10 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     return Scaffold(
       body: Stack(
         children: [
-          // Gradient background based on current page
+          // Solid color background — no gradients
           AnimatedContainer(
             duration: const Duration(milliseconds: 400),
-            decoration: BoxDecoration(
-              gradient: _getGradientForPage(_currentPage),
-            ),
+            color: _pageColors[_currentPage.clamp(0, _pageColors.length - 1)],
           ),
           SafeArea(
             child: Column(
@@ -66,71 +73,33 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     );
   }
 
-  LinearGradient _getGradientForPage(int page) {
-    final gradients = [
-      // Welcome - Deep purple (good contrast)
-      const LinearGradient(
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-        colors: [Color(0xFF5B247A), Color(0xFF1BCEDF)],
-      ),
-      // How it works - Deep teal
-      const LinearGradient(
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-        colors: [Color(0xFF0F2027), Color(0xFF2C5364)],
-      ),
-      // Camera - Deep coral/magenta
-      const LinearGradient(
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-        colors: [Color(0xFF834d9b), Color(0xFFd04ed6)],
-      ),
-      // Reminders - Deep blue
-      const LinearGradient(
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-        colors: [Color(0xFF1a2980), Color(0xFF26d0ce)],
-      ),
-      // Paywall - Rich purple/gold
-      const LinearGradient(
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-        colors: [Color(0xFF4A00E0), Color(0xFF8E2DE2)],
-      ),
-    ];
-    return gradients[page.clamp(0, gradients.length - 1)];
-  }
-
   Widget _buildWelcomePage(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(32),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          // Fun emoji stack
-          Stack(
-            alignment: Alignment.center,
-            children: [
-              Container(
-                width: 140,
-                height: 140,
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
-                  shape: BoxShape.circle,
-                ),
-              ),
-              const Text(
-                '🧠',
-                style: TextStyle(fontSize: 80),
-              ),
-            ],
+          // Neo-brutalist circle
+          Container(
+            width: 140,
+            height: 140,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              shape: BoxShape.circle,
+              border: Border.all(color: const Color(0xFF1A1A1A), width: 3),
+              boxShadow: const [
+                BoxShadow(color: Colors.black, offset: Offset(4, 4), blurRadius: 0),
+              ],
+            ),
+            child: const Center(
+              child: Text('🧠', style: TextStyle(fontSize: 70)),
+            ),
           ),
           const SizedBox(height: 48),
           Text(
             'Remember\nEvery Name',
             style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                  fontWeight: FontWeight.bold,
+                  fontWeight: FontWeight.w800,
                   color: Colors.white,
                   height: 1.1,
                 ),
@@ -140,13 +109,18 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.2),
-              borderRadius: BorderRadius.circular(30),
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: const Color(0xFF1A1A1A), width: 2),
+              boxShadow: const [
+                BoxShadow(color: Colors.black, offset: Offset(3, 3), blurRadius: 0),
+              ],
             ),
             child: Text(
-              '👩‍🏫 Teachers  •  👔 Professionals  •  🎉 Social butterflies',
+              '👩‍🏫 Teachers  •  👔 Pros  •  🎉 Social',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Colors.white,
+                    color: const Color(0xFF1A1A1A),
+                    fontWeight: FontWeight.w600,
                   ),
               textAlign: TextAlign.center,
             ),
@@ -155,7 +129,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           Text(
             'Build stronger connections by never\nforgetting a face (or name) again!',
             style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  color: Colors.white.withOpacity(0.9),
+                  color: Colors.white.withOpacity(0.95),
                   height: 1.5,
                 ),
             textAlign: TextAlign.center,
@@ -174,32 +148,17 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           Text(
             'Super Simple',
             style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                  fontWeight: FontWeight.bold,
+                  fontWeight: FontWeight.w800,
                   color: Colors.white,
                 ),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 40),
-          _buildStepCard(
-            context,
-            '📸',
-            'Snap Photos',
-            'Add photos of people you want to remember',
-          ),
+          _buildStepCard(context, '📸', 'Snap Photos', 'Add photos of people you want to remember'),
           const SizedBox(height: 16),
-          _buildStepCard(
-            context,
-            '🎯',
-            'Practice Daily',
-            'Fun flashcard games with smart repetition',
-          ),
+          _buildStepCard(context, '🎯', 'Practice Daily', 'Fun flashcard games with smart repetition'),
           const SizedBox(height: 16),
-          _buildStepCard(
-            context,
-            '🏆',
-            'Never Forget',
-            'Lock names into long-term memory',
-          ),
+          _buildStepCard(context, '🏆', 'Never Forget', 'Lock names into long-term memory'),
         ],
       ),
     );
@@ -209,9 +168,12 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.15),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withOpacity(0.2)),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFF1A1A1A), width: 2.5),
+        boxShadow: const [
+          BoxShadow(color: Colors.black, offset: Offset(4, 4), blurRadius: 0),
+        ],
       ),
       child: Row(
         children: [
@@ -224,14 +186,14 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 Text(
                   title,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
+                        fontWeight: FontWeight.w700,
+                        color: const Color(0xFF1A1A1A),
                       ),
                 ),
                 Text(
                   subtitle,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Colors.white.withOpacity(0.8),
+                        color: Colors.grey[700],
                       ),
                 ),
               ],
@@ -248,28 +210,26 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Stack(
-            alignment: Alignment.center,
-            children: [
-              Container(
-                width: 140,
-                height: 140,
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
-                  shape: BoxShape.circle,
-                ),
-              ),
-              const Text(
-                '📷',
-                style: TextStyle(fontSize: 80),
-              ),
-            ],
+          Container(
+            width: 140,
+            height: 140,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              shape: BoxShape.circle,
+              border: Border.all(color: const Color(0xFF1A1A1A), width: 3),
+              boxShadow: const [
+                BoxShadow(color: Colors.black, offset: Offset(4, 4), blurRadius: 0),
+              ],
+            ),
+            child: const Center(
+              child: Text('📷', style: TextStyle(fontSize: 70)),
+            ),
           ),
           const SizedBox(height: 48),
           Text(
             'Quick Setup',
             style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                  fontWeight: FontWeight.bold,
+                  fontWeight: FontWeight.w800,
                   color: Colors.white,
                 ),
             textAlign: TextAlign.center,
@@ -278,7 +238,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           Text(
             'Take photos or import from your library.\nWe\'ll organize everything for you!',
             style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  color: Colors.white.withOpacity(0.9),
+                  color: Colors.white.withOpacity(0.95),
                   height: 1.5,
                 ),
             textAlign: TextAlign.center,
@@ -287,19 +247,23 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.15),
-              borderRadius: BorderRadius.circular(30),
-              border: Border.all(color: Colors.white.withOpacity(0.2)),
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: const Color(0xFF1A1A1A), width: 2),
+              boxShadow: const [
+                BoxShadow(color: Colors.black, offset: Offset(3, 3), blurRadius: 0),
+              ],
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.lock, size: 18, color: Colors.white.withOpacity(0.9)),
+                const Icon(Icons.lock, size: 18, color: Color(0xFF1A1A1A)),
                 const SizedBox(width: 8),
                 Text(
                   'Photos stay on your device',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Colors.white.withOpacity(0.9),
+                        color: const Color(0xFF1A1A1A),
+                        fontWeight: FontWeight.w600,
                       ),
                 ),
               ],
@@ -316,28 +280,26 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Stack(
-            alignment: Alignment.center,
-            children: [
-              Container(
-                width: 140,
-                height: 140,
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
-                  shape: BoxShape.circle,
-                ),
-              ),
-              const Text(
-                '⏰',
-                style: TextStyle(fontSize: 80),
-              ),
-            ],
+          Container(
+            width: 140,
+            height: 140,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              shape: BoxShape.circle,
+              border: Border.all(color: const Color(0xFF1A1A1A), width: 3),
+              boxShadow: const [
+                BoxShadow(color: Colors.black, offset: Offset(4, 4), blurRadius: 0),
+              ],
+            ),
+            child: const Center(
+              child: Text('⏰', style: TextStyle(fontSize: 70)),
+            ),
           ),
           const SizedBox(height: 48),
           Text(
             'Stay Consistent',
             style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                  fontWeight: FontWeight.bold,
+                  fontWeight: FontWeight.w800,
                   color: Colors.white,
                 ),
             textAlign: TextAlign.center,
@@ -346,7 +308,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           Text(
             'A few minutes daily is all it takes.\nWe can remind you to practice!',
             style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  color: Colors.white.withOpacity(0.9),
+                  color: Colors.white.withOpacity(0.95),
                   height: 1.5,
                 ),
             textAlign: TextAlign.center,
@@ -355,9 +317,12 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.15),
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: Colors.white.withOpacity(0.2)),
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: const Color(0xFF1A1A1A), width: 2.5),
+              boxShadow: const [
+                BoxShadow(color: Colors.black, offset: Offset(4, 4), blurRadius: 0),
+              ],
             ),
             child: Column(
               children: [
@@ -370,14 +335,14 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                           Text(
                             'Daily Reminders',
                             style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
+                                  fontWeight: FontWeight.w700,
+                                  color: const Color(0xFF1A1A1A),
                                 ),
                           ),
                           Text(
                             'Get a gentle nudge to practice',
                             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                  color: Colors.white.withOpacity(0.8),
+                                  color: Colors.grey[600],
                                 ),
                           ),
                         ],
@@ -386,14 +351,13 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                     Switch(
                       value: _remindersEnabled,
                       onChanged: (value) => setState(() => _remindersEnabled = value),
-                      activeColor: Colors.white,
-                      activeTrackColor: Colors.white.withOpacity(0.4),
+                      activeColor: AppTheme.primaryColor,
                     ),
                   ],
                 ),
                 if (_remindersEnabled) ...[
                   const SizedBox(height: 16),
-                  Divider(color: Colors.white.withOpacity(0.2)),
+                  Divider(color: Colors.grey[300]),
                   const SizedBox(height: 12),
                   InkWell(
                     onTap: () async {
@@ -407,26 +371,27 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                     },
                     child: Row(
                       children: [
-                        Icon(Icons.access_time, color: Colors.white.withOpacity(0.9), size: 22),
+                        const Icon(Icons.access_time, color: Color(0xFF1A1A1A), size: 22),
                         const SizedBox(width: 12),
                         Text(
                           'Reminder Time',
                           style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                                color: Colors.white,
+                                color: const Color(0xFF1A1A1A),
                               ),
                         ),
                         const Spacer(),
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                           decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.2),
+                            color: AppTheme.chipBlue,
                             borderRadius: BorderRadius.circular(10),
+                            border: Border.all(color: const Color(0xFF1A1A1A), width: 2),
                           ),
                           child: Text(
                             _reminderTime.format(context),
                             style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w600,
+                                  color: const Color(0xFF1A1A1A),
+                                  fontWeight: FontWeight.w700,
                                 ),
                           ),
                         ),
@@ -448,28 +413,26 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Stack(
-            alignment: Alignment.center,
-            children: [
-              Container(
-                width: 140,
-                height: 140,
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
-                  shape: BoxShape.circle,
-                ),
-              ),
-              const Text(
-                '⭐',
-                style: TextStyle(fontSize: 80),
-              ),
-            ],
+          Container(
+            width: 140,
+            height: 140,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              shape: BoxShape.circle,
+              border: Border.all(color: const Color(0xFF1A1A1A), width: 3),
+              boxShadow: const [
+                BoxShadow(color: Colors.black, offset: Offset(4, 4), blurRadius: 0),
+              ],
+            ),
+            child: const Center(
+              child: Text('⭐', style: TextStyle(fontSize: 70)),
+            ),
           ),
           const SizedBox(height: 32),
           Text(
             'Go Premium',
             style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                  fontWeight: FontWeight.bold,
+                  fontWeight: FontWeight.w800,
                   color: Colors.white,
                 ),
             textAlign: TextAlign.center,
@@ -478,7 +441,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           Text(
             'One-time purchase, yours forever',
             style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  color: Colors.white.withOpacity(0.8),
+                  color: Colors.white.withOpacity(0.9),
                 ),
             textAlign: TextAlign.center,
           ),
@@ -492,9 +455,12 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.15),
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: Colors.white.withOpacity(0.3)),
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: const Color(0xFF1A1A1A), width: 2.5),
+              boxShadow: const [
+                BoxShadow(color: Colors.black, offset: Offset(3, 3), blurRadius: 0),
+              ],
             ),
             child: Column(
               children: [
@@ -505,15 +471,15 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                     Text(
                       'Free:',
                       style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                            color: Colors.white.withOpacity(0.9),
+                            color: const Color(0xFF1A1A1A),
                           ),
                     ),
                     const SizedBox(width: 8),
                     Text(
                       '1 group, 15 people',
                       style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w600,
+                            color: const Color(0xFF1A1A1A),
+                            fontWeight: FontWeight.w700,
                           ),
                     ),
                   ],
@@ -532,14 +498,14 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       children: [
         Text(
           check,
-          style: const TextStyle(fontSize: 18, color: Colors.white),
+          style: const TextStyle(fontSize: 18, color: Colors.white, fontWeight: FontWeight.w800),
         ),
         const SizedBox(width: 12),
         Text(
           text,
           style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                 color: Colors.white,
-                fontWeight: FontWeight.w500,
+                fontWeight: FontWeight.w600,
               ),
         ),
       ],
@@ -551,19 +517,25 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       padding: const EdgeInsets.all(24),
       child: Column(
         children: [
-          // Page indicators
+          // Page indicators — chunky dots with borders
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: List.generate(_totalPages, (index) {
+              final isActive = _currentPage == index;
               return Container(
                 margin: const EdgeInsets.symmetric(horizontal: 4),
-                width: _currentPage == index ? 24 : 8,
-                height: 8,
+                width: isActive ? 28 : 12,
+                height: 12,
                 decoration: BoxDecoration(
-                  color: _currentPage == index
-                      ? Colors.white
-                      : Colors.white.withOpacity(0.4),
-                  borderRadius: BorderRadius.circular(4),
+                  color: isActive ? Colors.white : Colors.white.withOpacity(0.3),
+                  borderRadius: BorderRadius.circular(6),
+                  border: Border.all(
+                    color: isActive ? const Color(0xFF1A1A1A) : Colors.white.withOpacity(0.3),
+                    width: isActive ? 2 : 1,
+                  ),
+                  boxShadow: isActive
+                      ? const [BoxShadow(color: Colors.black, offset: Offset(2, 2), blurRadius: 0)]
+                      : null,
                 ),
               );
             }),
@@ -585,23 +557,33 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     return SizedBox(
       width: double.infinity,
       height: 56,
-      child: ElevatedButton(
-        onPressed: () {
-          _pageController.nextPage(
-            duration: const Duration(milliseconds: 400),
-            curve: Curves.easeInOut,
-          );
-        },
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.white,
-          foregroundColor: Colors.black87,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: const Color(0xFF1A1A1A), width: 2.5),
+          boxShadow: const [
+            BoxShadow(color: Colors.black, offset: Offset(4, 4), blurRadius: 0),
+          ],
         ),
-        child: const Text(
-          'Continue',
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+        child: Material(
+          color: Colors.transparent,
+          borderRadius: BorderRadius.circular(14),
+          child: InkWell(
+            onTap: () {
+              _pageController.nextPage(
+                duration: const Duration(milliseconds: 400),
+                curve: Curves.easeInOut,
+              );
+            },
+            borderRadius: BorderRadius.circular(14),
+            child: const Center(
+              child: Text(
+                'Continue',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: Color(0xFF1A1A1A)),
+              ),
+            ),
+          ),
         ),
       ),
     );
@@ -613,24 +595,34 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         SizedBox(
           width: double.infinity,
           height: 56,
-          child: ElevatedButton(
-            onPressed: () async {
-              await Permission.camera.request();
-              _pageController.nextPage(
-                duration: const Duration(milliseconds: 400),
-                curve: Curves.easeInOut,
-              );
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.white,
-              foregroundColor: Colors.black87,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: const Color(0xFF1A1A1A), width: 2.5),
+              boxShadow: const [
+                BoxShadow(color: Colors.black, offset: Offset(4, 4), blurRadius: 0),
+              ],
             ),
-            child: const Text(
-              'Enable Camera',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+            child: Material(
+              color: Colors.transparent,
+              borderRadius: BorderRadius.circular(14),
+              child: InkWell(
+                onTap: () async {
+                  await Permission.camera.request();
+                  _pageController.nextPage(
+                    duration: const Duration(milliseconds: 400),
+                    curve: Curves.easeInOut,
+                  );
+                },
+                borderRadius: BorderRadius.circular(14),
+                child: const Center(
+                  child: Text(
+                    'Enable Camera',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: Color(0xFF1A1A1A)),
+                  ),
+                ),
+              ),
             ),
           ),
         ),
@@ -647,6 +639,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             style: TextStyle(
               color: Colors.white.withOpacity(0.9),
               fontSize: 16,
+              fontWeight: FontWeight.w600,
             ),
           ),
         ),
@@ -660,18 +653,28 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         SizedBox(
           width: double.infinity,
           height: 56,
-          child: ElevatedButton(
-            onPressed: () => _showPurchase(context),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.white,
-              foregroundColor: Colors.black87,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: const Color(0xFF1A1A1A), width: 2.5),
+              boxShadow: const [
+                BoxShadow(color: Colors.black, offset: Offset(4, 4), blurRadius: 0),
+              ],
             ),
-            child: const Text(
-              'Unlock Premium',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+            child: Material(
+              color: Colors.transparent,
+              borderRadius: BorderRadius.circular(14),
+              child: InkWell(
+                onTap: () => _showPurchase(context),
+                borderRadius: BorderRadius.circular(14),
+                child: const Center(
+                  child: Text(
+                    'Unlock Premium',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: Color(0xFF1A1A1A)),
+                  ),
+                ),
+              ),
             ),
           ),
         ),
@@ -683,6 +686,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             style: TextStyle(
               color: Colors.white.withOpacity(0.9),
               fontSize: 16,
+              fontWeight: FontWeight.w600,
             ),
           ),
         ),

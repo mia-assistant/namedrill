@@ -19,14 +19,7 @@ class StatsSummary extends ConsumerWidget {
       container: true,
       child: Container(
         padding: const EdgeInsets.all(Spacing.cardPadding),
-        decoration: BoxDecoration(
-          color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
-          borderRadius: BorderRadius.circular(CardStyles.borderRadius),
-          border: Border.all(
-            color: isDark ? Colors.grey[800]! : Colors.grey[200]!,
-          ),
-          boxShadow: CardStyles.softShadow(AppTheme.primaryColor),
-        ),
+        decoration: NeoStyles.cardDecoration(isDark: isDark),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -40,6 +33,7 @@ class StatsSummary extends ConsumerWidget {
                       context,
                       icon: Icons.local_fire_department,
                       iconColor: Colors.orange,
+                      chipColor: AppTheme.chipYellow,
                       value: '...',
                       label: 'streak',
                     ),
@@ -47,6 +41,7 @@ class StatsSummary extends ConsumerWidget {
                       context,
                       icon: Icons.local_fire_department,
                       iconColor: Colors.orange,
+                      chipColor: AppTheme.chipYellow,
                       value: '0',
                       label: 'day streak',
                     ),
@@ -54,6 +49,7 @@ class StatsSummary extends ConsumerWidget {
                       context,
                       icon: Icons.local_fire_department,
                       iconColor: Colors.orange,
+                      chipColor: AppTheme.chipYellow,
                       value: '${stats.currentStreak}',
                       label: stats.currentStreak == 1 ? 'day streak' : 'day streak',
                       highlight: stats.currentStreak >= 7,
@@ -69,6 +65,7 @@ class StatsSummary extends ConsumerWidget {
                     context,
                     icon: Icons.folder_outlined,
                     iconColor: Colors.cyan,
+                    chipColor: AppTheme.chipBlue,
                     value: '$groupCount',
                     label: groupCount == 1 ? 'group' : 'groups',
                   ),
@@ -83,6 +80,7 @@ class StatsSummary extends ConsumerWidget {
                       context,
                       icon: Icons.people_outline,
                       iconColor: AppTheme.secondaryColor,
+                      chipColor: AppTheme.chipGreen,
                       value: '...',
                       label: 'people',
                     ),
@@ -90,6 +88,7 @@ class StatsSummary extends ConsumerWidget {
                       context,
                       icon: Icons.people_outline,
                       iconColor: AppTheme.secondaryColor,
+                      chipColor: AppTheme.chipGreen,
                       value: '0',
                       label: 'people',
                     ),
@@ -97,6 +96,7 @@ class StatsSummary extends ConsumerWidget {
                       context,
                       icon: Icons.people_outline,
                       iconColor: AppTheme.secondaryColor,
+                      chipColor: AppTheme.chipGreen,
                       value: '$count',
                       label: count == 1 ? 'person' : 'people',
                     ),
@@ -114,6 +114,7 @@ class StatsSummary extends ConsumerWidget {
     BuildContext context, {
     required IconData icon,
     required Color iconColor,
+    required Color chipColor,
     required String value,
     required String label,
     bool highlight = false,
@@ -125,34 +126,33 @@ class StatsSummary extends ConsumerWidget {
         horizontal: Spacing.sm + 4,
         vertical: Spacing.md,
       ),
-      decoration: BoxDecoration(
-        color: highlight 
-            ? iconColor.withOpacity(0.1) 
-            : (isDark ? Colors.grey[850] : Colors.grey[50]),
-        borderRadius: BorderRadius.circular(CardStyles.smallBorderRadius),
-        border: highlight 
-            ? Border.all(color: iconColor.withOpacity(0.3))
-            : null,
+      decoration: NeoStyles.chipDecoration(
+        backgroundColor: isDark ? const Color(0xFF2A2A2A) : chipColor,
+        isDark: isDark,
+        borderRadius: CardStyles.smallBorderRadius,
+        shadowOffset: 3,
+        borderWidth: highlight ? 2.5 : 2,
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(
             icon,
-            size: 22,
+            size: 26,
             color: iconColor,
           ),
           const SizedBox(height: 6),
           Text(
             value,
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.bold,
+              fontWeight: FontWeight.w800,
             ),
           ),
           Text(
             label,
             style: Theme.of(context).textTheme.labelSmall?.copyWith(
               color: Theme.of(context).colorScheme.outline,
+              fontWeight: FontWeight.w600,
             ),
             overflow: TextOverflow.ellipsis,
           ),

@@ -108,6 +108,7 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen> {
     }
 
     final currentCard = _cards[_currentIndex];
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
       extendBodyBehindAppBar: true,
@@ -131,16 +132,29 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            // Progress bar with styling
+            // Progress bar — chunky with border
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(4),
-                child: LinearProgressIndicator(
-                  value: (_currentIndex + 1) / _cards.length,
-                  backgroundColor: groupColor.withOpacity(0.2),
-                  valueColor: AlwaysStoppedAnimation<Color>(groupColor),
-                  minHeight: 8,
+              child: Container(
+                height: 14,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(7),
+                  border: Border.all(
+                    color: isDark ? const Color(0xFF888888) : const Color(0xFF1A1A1A),
+                    width: 2,
+                  ),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(1),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(5),
+                    child: LinearProgressIndicator(
+                      value: (_currentIndex + 1) / _cards.length,
+                      backgroundColor: isDark ? Colors.grey[800] : Colors.grey[100],
+                      valueColor: AlwaysStoppedAnimation<Color>(groupColor),
+                      minHeight: 10,
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -148,7 +162,7 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen> {
             
             const SizedBox(height: Spacing.lg),
             
-            // Card area - takes more vertical space
+            // Card area
             Expanded(
               flex: 5,
               child: Semantics(
@@ -207,9 +221,11 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen> {
                             horizontal: 20,
                             vertical: 12,
                           ),
-                          decoration: BoxDecoration(
-                            color: groupColor.withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(20),
+                          decoration: NeoStyles.chipDecoration(
+                            backgroundColor: isDark ? const Color(0xFF2A2A2A) : AppTheme.chipBlue,
+                            isDark: isDark,
+                            borderRadius: 14,
+                            shadowOffset: 2,
                           ),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
@@ -224,7 +240,7 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen> {
                                 'Tap card to reveal',
                                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                                       color: groupColor,
-                                      fontWeight: FontWeight.w500,
+                                      fontWeight: FontWeight.w600,
                                     ),
                               ),
                             ],
@@ -246,45 +262,62 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen> {
     required bool isOutlined,
     required VoidCallback onPressed,
   }) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
     if (isOutlined) {
-      return OutlinedButton(
-        onPressed: onPressed,
-        style: OutlinedButton.styleFrom(
-          foregroundColor: color,
-          side: BorderSide(color: color, width: 2),
-          padding: const EdgeInsets.symmetric(vertical: 16),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(14),
-          ),
+      return Container(
+        decoration: NeoStyles.buttonDecoration(
+          backgroundColor: isDark ? const Color(0xFF1E1E1E) : Colors.white,
+          isDark: isDark,
+          borderRadius: 14,
+          shadowOffset: 3,
         ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon, size: 20),
-            const SizedBox(width: 8),
-            Text(label, style: const TextStyle(fontWeight: FontWeight.w600)),
-          ],
+        child: Material(
+          color: Colors.transparent,
+          borderRadius: BorderRadius.circular(14),
+          child: InkWell(
+            onTap: onPressed,
+            borderRadius: BorderRadius.circular(14),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(icon, size: 20, color: color),
+                  const SizedBox(width: 8),
+                  Text(label, style: TextStyle(fontWeight: FontWeight.w700, color: color, fontSize: 15)),
+                ],
+              ),
+            ),
+          ),
         ),
       );
     } else {
-      return ElevatedButton(
-        onPressed: onPressed,
-        style: ElevatedButton.styleFrom(
+      return Container(
+        decoration: NeoStyles.buttonDecoration(
           backgroundColor: color,
-          foregroundColor: Colors.white,
-          padding: const EdgeInsets.symmetric(vertical: 16),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(14),
-          ),
-          elevation: 2,
+          isDark: isDark,
+          borderRadius: 14,
+          shadowOffset: 3,
         ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon, size: 20),
-            const SizedBox(width: 8),
-            Text(label, style: const TextStyle(fontWeight: FontWeight.w600)),
-          ],
+        child: Material(
+          color: Colors.transparent,
+          borderRadius: BorderRadius.circular(14),
+          child: InkWell(
+            onTap: onPressed,
+            borderRadius: BorderRadius.circular(14),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(icon, size: 20, color: Colors.white),
+                  const SizedBox(width: 8),
+                  Text(label, style: const TextStyle(fontWeight: FontWeight.w700, color: Colors.white, fontSize: 15)),
+                ],
+              ),
+            ),
+          ),
         ),
       );
     }
@@ -298,43 +331,48 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen> {
       child: Container(
         key: ValueKey('${card.person.id}_$_isRevealed'),
         width: double.infinity,
-        decoration: BoxDecoration(
-          color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
-          borderRadius: BorderRadius.circular(CardStyles.borderRadius),
-          border: Border.all(
-            color: isDark ? Colors.grey[800]! : Colors.grey[200]!,
-          ),
-          boxShadow: CardStyles.softShadow(groupColor),
+        decoration: NeoStyles.cardDecoration(
+          isDark: isDark,
+          shadowOffset: 5,
         ),
         child: ClipRRect(
-          borderRadius: BorderRadius.circular(CardStyles.borderRadius),
+          borderRadius: BorderRadius.circular(CardStyles.borderRadius - 2),
           child: Padding(
             padding: const EdgeInsets.all(Spacing.cardPadding),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 if (card.showFaceFirst || _isRevealed) ...[
-                  // Show photo (either as prompt or as reveal)
+                  // Show photo
                   Expanded(
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(CardStyles.smallBorderRadius),
-                      child: Image.file(
-                        File(card.person.photoPath),
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => Container(
-                          color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                          child: Icon(
-                            Icons.person,
-                            size: 80,
-                            color: Theme.of(context).colorScheme.outline,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(CardStyles.smallBorderRadius),
+                        border: Border.all(
+                          color: isDark ? const Color(0xFF888888) : const Color(0xFF1A1A1A),
+                          width: 2,
+                        ),
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(CardStyles.smallBorderRadius - 2),
+                        child: Image.file(
+                          File(card.person.photoPath),
+                          fit: BoxFit.cover,
+                          width: double.infinity,
+                          errorBuilder: (_, __, ___) => Container(
+                            color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                            child: Icon(
+                              Icons.person,
+                              size: 80,
+                              color: Theme.of(context).colorScheme.outline,
+                            ),
                           ),
                         ),
                       ),
                     ),
                   ),
                 ] else ...[
-                  // Show name only (name→face mode, not revealed yet)
-                  // Display the name prominently and a placeholder for the face
+                  // Name→face mode, not revealed
                   Expanded(
                     child: Center(
                       child: Column(
@@ -343,8 +381,12 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen> {
                           Container(
                             padding: const EdgeInsets.all(Spacing.lg),
                             decoration: BoxDecoration(
-                              color: groupColor.withOpacity(0.1),
+                              color: isDark ? const Color(0xFF2A2A2A) : AppTheme.chipBlue,
                               shape: BoxShape.circle,
+                              border: Border.all(
+                                color: isDark ? const Color(0xFF888888) : const Color(0xFF1A1A1A),
+                                width: 2,
+                              ),
                             ),
                             child: Icon(
                               Icons.person_outline,
@@ -375,14 +417,16 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen> {
                       horizontal: Spacing.lg,
                       vertical: Spacing.md,
                     ),
-                    decoration: BoxDecoration(
-                      color: groupColor.withOpacity(0.08),
-                      borderRadius: BorderRadius.circular(CardStyles.smallBorderRadius),
+                    decoration: NeoStyles.chipDecoration(
+                      backgroundColor: isDark ? groupColor.withOpacity(0.2) : groupColor.withOpacity(0.12),
+                      isDark: isDark,
+                      borderRadius: CardStyles.smallBorderRadius,
+                      shadowOffset: 2,
                     ),
                     child: Text(
                       card.person.name,
                       style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                            fontWeight: FontWeight.bold,
+                            fontWeight: FontWeight.w800,
                             color: groupColor,
                           ),
                       textAlign: TextAlign.center,
@@ -396,20 +440,23 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen> {
                         ),
                   ),
                 ] else if (card.showFaceFirst && !_isRevealed) ...[
-                  // Face→name mode: prompt to reveal name
+                  // Face→name mode: prompt
                   Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: Spacing.lg,
                       vertical: Spacing.md,
                     ),
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                      borderRadius: BorderRadius.circular(CardStyles.smallBorderRadius),
+                    decoration: NeoStyles.chipDecoration(
+                      backgroundColor: isDark ? const Color(0xFF2A2A2A) : AppTheme.chipYellow,
+                      isDark: isDark,
+                      borderRadius: CardStyles.smallBorderRadius,
+                      shadowOffset: 2,
                     ),
                     child: Text(
                       'Who is this?',
                       style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                             color: Theme.of(context).colorScheme.outline,
+                            fontWeight: FontWeight.w600,
                           ),
                     ),
                   ),
@@ -427,14 +474,16 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen> {
                       horizontal: Spacing.lg,
                       vertical: Spacing.md,
                     ),
-                    decoration: BoxDecoration(
-                      color: groupColor.withOpacity(0.08),
-                      borderRadius: BorderRadius.circular(CardStyles.smallBorderRadius),
+                    decoration: NeoStyles.chipDecoration(
+                      backgroundColor: isDark ? groupColor.withOpacity(0.2) : groupColor.withOpacity(0.12),
+                      isDark: isDark,
+                      borderRadius: CardStyles.smallBorderRadius,
+                      shadowOffset: 2,
                     ),
                     child: Text(
                       card.person.name,
                       style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                            fontWeight: FontWeight.bold,
+                            fontWeight: FontWeight.w800,
                             color: groupColor,
                           ),
                       textAlign: TextAlign.center,
@@ -450,6 +499,8 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen> {
   }
 
   Widget _buildAllCaughtUpScreen() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
     return Scaffold(
       body: SafeArea(
         child: Center(
@@ -458,38 +509,30 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-              // Success illustration
-              Stack(
-                alignment: Alignment.center,
-                children: [
-                  Container(
-                    width: 120,
-                    height: 120,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: AppTheme.successColor.withOpacity(0.08),
-                    ),
+              // Success illustration — neo-brutalist
+              Container(
+                width: 110,
+                height: 110,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: isDark ? const Color(0xFF2A2A2A) : AppTheme.chipGreen,
+                  border: Border.all(
+                    color: isDark ? const Color(0xFF888888) : const Color(0xFF1A1A1A),
+                    width: 3,
                   ),
-                  Container(
-                    width: 90,
-                    height: 90,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: AppTheme.successColor.withOpacity(0.12),
-                    ),
-                  ),
-                  Icon(
-                    Icons.check_circle,
-                    size: 60,
-                    color: AppTheme.successColor,
-                  ),
-                ],
+                  boxShadow: NeoStyles.hardShadow(offset: 4, isDark: isDark),
+                ),
+                child: Icon(
+                  Icons.check_circle,
+                  size: 60,
+                  color: AppTheme.successColor,
+                ),
               ),
               const SizedBox(height: 32),
               Text(
                 'All caught up!',
                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
+                      fontWeight: FontWeight.w800,
                     ),
               ),
               const SizedBox(height: 12),
@@ -577,6 +620,7 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen> {
   Widget _buildSummaryScreen() {
     final accuracy = _totalReviewed > 0 ? (_correctCount / _totalReviewed * 100).round() : 0;
     final isGreat = accuracy >= 80;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
       body: SafeArea(
@@ -585,30 +629,30 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // Trophy or school icon
-              Stack(
-                alignment: Alignment.center,
-                children: [
-                  Container(
-                    width: 100,
-                    height: 100,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: (isGreat ? Colors.amber : AppTheme.primaryColor).withOpacity(0.08),
-                    ),
+              // Trophy — neo-brutalist
+              Container(
+                width: 100,
+                height: 100,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: isDark ? const Color(0xFF2A2A2A) : (isGreat ? AppTheme.chipYellow : AppTheme.chipBlue),
+                  border: Border.all(
+                    color: isDark ? const Color(0xFF888888) : const Color(0xFF1A1A1A),
+                    width: 3,
                   ),
-                  Icon(
-                    isGreat ? Icons.emoji_events : Icons.school,
-                    size: 56,
-                    color: isGreat ? Colors.amber : AppTheme.primaryColor,
-                  ),
-                ],
+                  boxShadow: NeoStyles.hardShadow(offset: 4, isDark: isDark),
+                ),
+                child: Icon(
+                  isGreat ? Icons.emoji_events : Icons.school,
+                  size: 56,
+                  color: isGreat ? Colors.amber : AppTheme.primaryColor,
+                ),
               ),
               const SizedBox(height: 24),
               Text(
                 isGreat ? 'Great job!' : 'Keep practicing!',
                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
+                      fontWeight: FontWeight.w800,
                     ),
               ),
               const SizedBox(height: 32),
@@ -617,9 +661,9 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  _buildStatCard(context, '$_totalReviewed', 'Cards', Icons.style),
-                  _buildStatCard(context, '$accuracy%', 'Accuracy', Icons.track_changes),
-                  _buildStatCard(context, '$_correctCount', 'Correct', Icons.check_circle),
+                  _buildStatCard(context, '$_totalReviewed', 'Cards', Icons.style, AppTheme.chipBlue),
+                  _buildStatCard(context, '$accuracy%', 'Accuracy', Icons.track_changes, AppTheme.chipPink),
+                  _buildStatCard(context, '$_correctCount', 'Correct', Icons.check_circle, AppTheme.chipGreen),
                 ],
               ),
               
@@ -628,7 +672,7 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen> {
                 Text(
                   'Focus on these:',
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
+                        fontWeight: FontWeight.w700,
                       ),
                 ),
                 const SizedBox(height: 16),
@@ -638,18 +682,19 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen> {
                   alignment: WrapAlignment.center,
                   children: _weakestPeople.take(5).map((person) {
                     return Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(
-                          color: Theme.of(context).colorScheme.outline.withOpacity(0.2),
-                          ),
-                        ),
+                      decoration: NeoStyles.chipDecoration(
+                        backgroundColor: isDark ? const Color(0xFF2A2A2A) : Colors.white,
+                        isDark: isDark,
+                        borderRadius: 20,
+                        shadowOffset: 2,
+                        borderWidth: 2,
+                      ),
                         child: Chip(
                           avatar: CircleAvatar(
                             backgroundImage: FileImage(File(person.photoPath)),
                             onBackgroundImageError: (_, __) {},
                           ),
-                          label: Text(person.name),
+                          label: Text(person.name, style: const TextStyle(fontWeight: FontWeight.w600)),
                           backgroundColor: Colors.transparent,
                           side: BorderSide.none,
                         ),
@@ -678,31 +723,32 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen> {
       );
   }
 
-  Widget _buildStatCard(BuildContext context, String value, String label, IconData icon) {
+  Widget _buildStatCard(BuildContext context, String value, String label, IconData icon, Color chipBg) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: Spacing.lg, vertical: Spacing.md),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
-        borderRadius: BorderRadius.circular(CardStyles.smallBorderRadius),
-        border: Border.all(
-          color: Theme.of(context).colorScheme.outline.withOpacity(0.1),
-        ),
-        boxShadow: CardStyles.defaultShadow,
+      decoration: NeoStyles.chipDecoration(
+        backgroundColor: isDark ? const Color(0xFF1E1E1E) : chipBg,
+        isDark: isDark,
+        borderRadius: CardStyles.smallBorderRadius,
+        shadowOffset: 3,
       ),
       child: Column(
         children: [
-          Icon(icon, size: 20, color: AppTheme.primaryColor),
+          Icon(icon, size: 22, color: AppTheme.primaryColor),
           const SizedBox(height: Spacing.xs),
           Text(
             value,
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
+                  fontWeight: FontWeight.w800,
                 ),
           ),
           Text(
             label,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: Theme.of(context).colorScheme.outline,
+                  fontWeight: FontWeight.w600,
                 ),
           ),
         ],

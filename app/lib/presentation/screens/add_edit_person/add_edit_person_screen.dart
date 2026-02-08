@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 
+import '../../../core/theme/app_theme.dart';
 import '../../../data/models/person_model.dart';
 import '../group_detail/group_detail_screen.dart';
 
@@ -49,6 +50,8 @@ class _AddEditPersonScreenState extends ConsumerState<AddEditPersonScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
     return Scaffold(
       appBar: AppBar(
         title: Text(isEditing ? 'Edit Person' : 'Add Person'),
@@ -67,7 +70,7 @@ class _AddEditPersonScreenState extends ConsumerState<AddEditPersonScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Photo section
+              // Photo section — neo-brutalist
               Center(
                 child: GestureDetector(
                   onTap: _showPhotoOptions,
@@ -76,23 +79,19 @@ class _AddEditPersonScreenState extends ConsumerState<AddEditPersonScreen> {
                       Container(
                         width: 200,
                         height: 200,
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                          borderRadius: BorderRadius.circular(16),
-                          border: _photoPath == null
-                              ? Border.all(
-                                  color: Theme.of(context).colorScheme.outline,
-                                  width: 2,
-                                  style: BorderStyle.solid,
-                                )
-                              : null,
+                        decoration: NeoStyles.cardDecoration(
+                          isDark: isDark,
+                          borderRadius: 16,
+                          shadowOffset: 5,
                         ),
                         child: _photoPath != null
                             ? ClipRRect(
-                                borderRadius: BorderRadius.circular(16),
+                                borderRadius: BorderRadius.circular(14),
                                 child: Image.file(
                                   File(_photoPath!),
                                   fit: BoxFit.cover,
+                                  width: 200,
+                                  height: 200,
                                   errorBuilder: (_, __, ___) => _buildPhotoPlaceholder(context),
                                 ),
                               )
@@ -106,6 +105,11 @@ class _AddEditPersonScreenState extends ConsumerState<AddEditPersonScreen> {
                           decoration: BoxDecoration(
                             color: Theme.of(context).colorScheme.primary,
                             shape: BoxShape.circle,
+                            border: Border.all(
+                              color: isDark ? const Color(0xFF888888) : const Color(0xFF1A1A1A),
+                              width: 2,
+                            ),
+                            boxShadow: NeoStyles.hardShadow(offset: 2, isDark: isDark),
                           ),
                           child: Icon(
                             Icons.camera_alt,
@@ -206,6 +210,7 @@ class _AddEditPersonScreenState extends ConsumerState<AddEditPersonScreen> {
           'Add Photo',
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 color: Theme.of(context).colorScheme.outline,
+                fontWeight: FontWeight.w600,
               ),
         ),
       ],

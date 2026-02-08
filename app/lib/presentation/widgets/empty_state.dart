@@ -18,6 +18,8 @@ class EmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
     return Center(
       child: Semantics(
         label: '$title. $message',
@@ -26,17 +28,22 @@ class EmptyState extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // Clean single circle with icon
+              // Neo-brutalist bordered circle with icon
               Container(
-                width: 100,
-                height: 100,
+                width: 110,
+                height: 110,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: AppTheme.primaryColor.withOpacity(0.08),
+                  color: isDark ? const Color(0xFF2A2A2A) : AppTheme.chipBlue,
+                  border: Border.all(
+                    color: isDark ? const Color(0xFF888888) : const Color(0xFF1A1A1A),
+                    width: 2.5,
+                  ),
+                  boxShadow: NeoStyles.hardShadow(offset: 4, isDark: isDark),
                 ),
                 child: Icon(
                   icon,
-                  size: 44,
+                  size: 48,
                   color: AppTheme.primaryColor,
                 ),
               ),

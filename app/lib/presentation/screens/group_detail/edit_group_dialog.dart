@@ -44,6 +44,8 @@ class _EditGroupDialogState extends ConsumerState<EditGroupDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
     return AlertDialog(
       title: const Text('Edit Group'),
       content: Form(
@@ -74,7 +76,7 @@ class _EditGroupDialogState extends ConsumerState<EditGroupDialog> {
             Text(
               'Color',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w500,
+                    fontWeight: FontWeight.w700,
                   ),
             ),
             const SizedBox(height: 12),
@@ -86,25 +88,17 @@ class _EditGroupDialogState extends ConsumerState<EditGroupDialog> {
                 return GestureDetector(
                   onTap: () => setState(() => _selectedColor = color),
                   child: Container(
-                    width: 36,
-                    height: 36,
+                    width: 38,
+                    height: 38,
                     decoration: BoxDecoration(
                       color: color,
                       shape: BoxShape.circle,
-                      border: isSelected
-                          ? Border.all(
-                              color: Theme.of(context).colorScheme.onSurface,
-                              width: 3,
-                            )
-                          : null,
+                      border: Border.all(
+                        color: isDark ? const Color(0xFF888888) : const Color(0xFF1A1A1A),
+                        width: isSelected ? 3 : 2,
+                      ),
                       boxShadow: isSelected
-                          ? [
-                              BoxShadow(
-                                color: color.withOpacity(0.4),
-                                blurRadius: 8,
-                                spreadRadius: 2,
-                              )
-                            ]
+                          ? NeoStyles.hardShadow(offset: 3, isDark: isDark)
                           : null,
                     ),
                     child: isSelected

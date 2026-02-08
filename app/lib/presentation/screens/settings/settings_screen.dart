@@ -109,7 +109,7 @@ class SettingsScreen extends ConsumerWidget {
               Divider(
                 height: 1,
                 indent: 56,
-                color: isDark ? Colors.grey[800] : Colors.grey[200],
+                color: isDark ? Colors.grey[700] : const Color(0xFF1A1A1A).withOpacity(0.15),
               ),
               _buildSettingsTile(
                 context: context,
@@ -141,7 +141,7 @@ class SettingsScreen extends ConsumerWidget {
             Divider(
               height: 1,
               indent: 56,
-              color: isDark ? Colors.grey[800] : Colors.grey[200],
+              color: isDark ? Colors.grey[700] : const Color(0xFF1A1A1A).withOpacity(0.15),
             ),
             _buildSettingsTile(
               context: context,
@@ -153,7 +153,7 @@ class SettingsScreen extends ConsumerWidget {
             Divider(
               height: 1,
               indent: 56,
-              color: isDark ? Colors.grey[800] : Colors.grey[200],
+              color: isDark ? Colors.grey[700] : const Color(0xFF1A1A1A).withOpacity(0.15),
             ),
             _buildSettingsTile(
               context: context,
@@ -165,7 +165,7 @@ class SettingsScreen extends ConsumerWidget {
             Divider(
               height: 1,
               indent: 56,
-              color: isDark ? Colors.grey[800] : Colors.grey[200],
+              color: isDark ? Colors.grey[700] : const Color(0xFF1A1A1A).withOpacity(0.15),
             ),
             _buildSettingsTile(
               context: context,
@@ -197,7 +197,7 @@ class SettingsScreen extends ConsumerWidget {
             Divider(
               height: 1,
               indent: 56,
-              color: isDark ? Colors.grey[800] : Colors.grey[200],
+              color: isDark ? Colors.grey[700] : const Color(0xFF1A1A1A).withOpacity(0.15),
             ),
             _buildSettingsTile(
               context: context,
@@ -209,7 +209,7 @@ class SettingsScreen extends ConsumerWidget {
             Divider(
               height: 1,
               indent: 56,
-              color: isDark ? Colors.grey[800] : Colors.grey[200],
+              color: isDark ? Colors.grey[700] : const Color(0xFF1A1A1A).withOpacity(0.15),
             ),
             _buildSettingsTile(
               context: context,
@@ -233,8 +233,8 @@ class SettingsScreen extends ConsumerWidget {
         title.toUpperCase(),
         style: Theme.of(context).textTheme.labelMedium?.copyWith(
               color: Theme.of(context).colorScheme.primary,
-              fontWeight: FontWeight.bold,
-              letterSpacing: 0.8,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 1.0,
             ),
       ),
     );
@@ -242,16 +242,9 @@ class SettingsScreen extends ConsumerWidget {
 
   Widget _buildSectionCard(BuildContext context, bool isDark, {required List<Widget> children}) {
     return Container(
-      decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
-        borderRadius: BorderRadius.circular(CardStyles.borderRadius),
-        border: Border.all(
-          color: isDark ? Colors.grey[800]! : Colors.grey[200]!,
-        ),
-        boxShadow: CardStyles.defaultShadow,
-      ),
+      decoration: NeoStyles.cardDecoration(isDark: isDark, shadowOffset: 4),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(CardStyles.borderRadius),
+        borderRadius: BorderRadius.circular(CardStyles.borderRadius - 2),
         child: Column(
           children: children,
         ),
@@ -269,6 +262,7 @@ class SettingsScreen extends ConsumerWidget {
     bool showExternalIcon = false,
     bool isDestructive = false,
   }) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final color = isDestructive ? AppTheme.errorColor : null;
     
     return ListTile(
@@ -276,9 +270,14 @@ class SettingsScreen extends ConsumerWidget {
       leading: Container(
         width: 40,
         height: 40,
-        decoration: BoxDecoration(
-          color: (color ?? AppTheme.primaryColor).withOpacity(0.1),
-          borderRadius: BorderRadius.circular(10),
+        decoration: NeoStyles.chipDecoration(
+          backgroundColor: isDark
+              ? (color ?? AppTheme.primaryColor).withOpacity(0.15)
+              : (color ?? AppTheme.primaryColor).withOpacity(0.12),
+          isDark: isDark,
+          borderRadius: 10,
+          shadowOffset: 2,
+          borderWidth: 1.5,
         ),
         child: Icon(
           icon,
@@ -290,7 +289,7 @@ class SettingsScreen extends ConsumerWidget {
         title,
         style: TextStyle(
           color: color,
-          fontWeight: FontWeight.w500,
+          fontWeight: FontWeight.w600,
         ),
       ),
       subtitle: subtitle != null
@@ -318,14 +317,21 @@ class SettingsScreen extends ConsumerWidget {
     required bool value,
     required ValueChanged<bool> onChanged,
   }) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: Spacing.md, vertical: Spacing.xs),
       leading: Container(
         width: 40,
         height: 40,
-        decoration: BoxDecoration(
-          color: AppTheme.primaryColor.withOpacity(0.1),
-          borderRadius: BorderRadius.circular(10),
+        decoration: NeoStyles.chipDecoration(
+          backgroundColor: isDark
+              ? AppTheme.primaryColor.withOpacity(0.15)
+              : AppTheme.primaryColor.withOpacity(0.12),
+          isDark: isDark,
+          borderRadius: 10,
+          shadowOffset: 2,
+          borderWidth: 1.5,
         ),
         child: Icon(
           icon,
@@ -335,7 +341,7 @@ class SettingsScreen extends ConsumerWidget {
       ),
       title: Text(
         title,
-        style: const TextStyle(fontWeight: FontWeight.w500),
+        style: const TextStyle(fontWeight: FontWeight.w600),
       ),
       subtitle: subtitle != null ? Text(subtitle, style: Theme.of(context).textTheme.bodySmall) : null,
       trailing: Switch.adaptive(
@@ -350,23 +356,10 @@ class SettingsScreen extends ConsumerWidget {
     final isLoading = purchaseState.status == PurchaseStatus.loading;
     
     return Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            AppTheme.primaryColor,
-            AppTheme.primaryColor.withBlue(255),
-          ],
-        ),
-        borderRadius: BorderRadius.circular(CardStyles.borderRadius),
-        boxShadow: [
-          BoxShadow(
-            color: AppTheme.primaryColor.withOpacity(0.3),
-            blurRadius: 20,
-            offset: const Offset(0, 8),
-          ),
-        ],
+      decoration: NeoStyles.cardDecoration(
+        isDark: isDark,
+        backgroundColor: AppTheme.accentColor,
+        shadowOffset: 5,
       ),
       child: Padding(
         padding: const EdgeInsets.all(Spacing.lg),
@@ -378,8 +371,12 @@ class SettingsScreen extends ConsumerWidget {
                 Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.2),
+                    color: Colors.white,
                     borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: isDark ? const Color(0xFF888888) : const Color(0xFF1A1A1A),
+                      width: 2,
+                    ),
                   ),
                   child: const Icon(Icons.star, color: Colors.amber, size: 24),
                 ),
@@ -391,16 +388,17 @@ class SettingsScreen extends ConsumerWidget {
                       const Text(
                         'Upgrade to Premium',
                         style: TextStyle(
-                          color: Colors.white,
+                          color: Color(0xFF1A1A1A),
                           fontSize: 18,
-                          fontWeight: FontWeight.bold,
+                          fontWeight: FontWeight.w800,
                         ),
                       ),
-                      Text(
+                      const Text(
                         'Unlock unlimited potential',
                         style: TextStyle(
-                          color: Colors.white.withOpacity(0.8),
+                          color: Color(0xFF1A1A1A),
                           fontSize: 13,
+                          fontWeight: FontWeight.w500,
                         ),
                       ),
                     ],
@@ -417,41 +415,54 @@ class SettingsScreen extends ConsumerWidget {
             const SizedBox(height: Spacing.lg),
             SizedBox(
               width: double.infinity,
-              child: ElevatedButton(
-                onPressed: isLoading ? null : () => _handlePurchase(context, ref),
-                style: ElevatedButton.styleFrom(
+              child: Container(
+                decoration: NeoStyles.buttonDecoration(
                   backgroundColor: Colors.white,
-                  foregroundColor: AppTheme.primaryColor,
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  elevation: 0,
+                  isDark: isDark,
+                  borderRadius: 12,
+                  shadowOffset: 3,
                 ),
-                child: isLoading
-                    ? const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation<Color>(AppTheme.primaryColor),
-                        ),
-                      )
-                    : Text(
-                        'Unlock for ${purchaseState.priceString}',
-                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                child: Material(
+                  color: Colors.transparent,
+                  borderRadius: BorderRadius.circular(12),
+                  child: InkWell(
+                    onTap: isLoading ? null : () => _handlePurchase(context, ref),
+                    borderRadius: BorderRadius.circular(12),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      child: Center(
+                        child: isLoading
+                            ? const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  valueColor: AlwaysStoppedAnimation<Color>(AppTheme.primaryColor),
+                                ),
+                              )
+                            : Text(
+                                'Unlock for ${purchaseState.priceString}',
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w800,
+                                  fontSize: 16,
+                                  color: AppTheme.primaryColor,
+                                ),
+                              ),
                       ),
+                    ),
+                  ),
+                ),
               ),
             ),
             const SizedBox(height: Spacing.sm),
             Center(
               child: TextButton(
                 onPressed: isLoading ? null : () => _handleRestore(context, ref),
-                child: Text(
+                child: const Text(
                   'Restore Purchase',
                   style: TextStyle(
-                    color: Colors.white.withOpacity(0.9),
-                    fontWeight: FontWeight.w500,
+                    color: Color(0xFF1A1A1A),
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ),
@@ -465,17 +476,18 @@ class SettingsScreen extends ConsumerWidget {
   Widget _buildFeatureRow(String text, bool included) {
     return Row(
       children: [
-        Icon(
+        const Icon(
           Icons.check_circle,
           size: 18,
-          color: Colors.white.withOpacity(0.9),
+          color: Color(0xFF1A1A1A),
         ),
         const SizedBox(width: Spacing.sm),
         Text(
           text,
-          style: TextStyle(
-            color: Colors.white.withOpacity(0.95),
+          style: const TextStyle(
+            color: Color(0xFF1A1A1A),
             fontSize: 14,
+            fontWeight: FontWeight.w600,
           ),
         ),
       ],
