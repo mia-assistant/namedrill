@@ -29,16 +29,20 @@ class HomeScreen extends ConsumerWidget {
             Container(
               width: 40,
               height: 40,
-              decoration: NeoStyles.cardDecoration(
-                isDark: isDark,
-                borderRadius: 10,
-                shadowOffset: 3,
-                borderWidth: 2,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(
+                  color: isDark ? const Color(0xFFE0E0E0) : const Color(0xFF1A1A1A),
+                  width: 2,
+                ),
               ),
               clipBehavior: Clip.antiAlias,
-              child: Image.asset(
-                'assets/images/logo.png',
-                fit: BoxFit.cover,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: Image.asset(
+                  'assets/images/logo.png',
+                  fit: BoxFit.cover,
+                ),
               ),
             ),
             const SizedBox(width: 12),
