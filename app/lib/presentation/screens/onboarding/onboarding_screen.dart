@@ -4,6 +4,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import '../../../core/constants/app_constants.dart';
+import '../../../core/providers/purchase_providers.dart';
+import '../../../core/services/purchase_service.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../providers/app_providers.dart';
 import '../home/home_screen.dart';
@@ -28,6 +30,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   final PageController _pageController = PageController();
   int _currentPage = 0;
   bool _remindersEnabled = false;
+  bool _isPurchasing = false;
   TimeOfDay _reminderTime = const TimeOfDay(hour: 9, minute: 0);
   
   final int _totalPages = 5; // Welcome, How it works, Camera, Reminders, Paywall
@@ -413,6 +416,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   }
 
   Widget _buildPaywallPage(BuildContext context) {
+    final purchaseState = ref.watch(purchaseStateProvider);
+    final priceString = purchaseState.priceString ?? '\$4.99';
+    
     return Padding(
       padding: const EdgeInsets.all(32),
       child: Column(
@@ -469,25 +475,19 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             ),
             child: Column(
               children: [
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Text(
-                      'Free:',
-                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                            color: const Color(0xFF1A1A1A),
-                          ),
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      '1 group, 15 people',
-                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                            color: const Color(0xFF1A1A1A),
-                            fontWeight: FontWeight.w700,
-                          ),
-                    ),
-                  ],
+                Text(
+                  priceString,
+                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                        color: const Color(0xFF1A1A1A),
+                        fontWeight: FontWeight.w800,
+                      ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'One-time payment',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: const Color(0xFF1A1A1A).withOpacity(0.7),
+                      ),
                 ),
               ],
             ),
@@ -653,6 +653,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   }
 
   Widget _buildPaywallButtons(BuildContext context) {
+    final purchaseState = ref.watch(purchaseStateProvider);
+    final priceString = purchaseState.priceString ?? '\$4.99';
+    
     return Column(
       children: [
         SizedBox(
@@ -671,13 +674,26 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
               color: Colors.transparent,
               borderRadius: BorderRadius.circular(14),
               child: InkWell(
-                onTap: () => _showPurchase(context),
+                onTap: _isPurchasing ? null : () => _showPurchase(context),
                 borderRadius: BorderRadius.circular(14),
-                child: const Center(
-                  child: Text(
-                    'Unlock Premium',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: Color(0xFF1A1A1A)),
-                  ),
+                child: Center(
+                  child: _isPurchasing
+                      ? const SizedBox(
+                          width: 24,
+                          height: 24,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2.5,
+                            color: Color(0xFF1A1A1A),
+                          ),
+                        )
+                      : Text(
+                          'Unlock Premium — $priceString',
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w700,
+                            color: Color(0xFF1A1A1A),
+                          ),
+                        ),
                 ),
               ),
             ),
@@ -685,7 +701,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         ),
         const SizedBox(height: 12),
         TextButton(
-          onPressed: () => _completeOnboarding(),
+          onPressed: _isPurchasing ? null : () => _completeOnboarding(),
           child: Text(
             'Continue with free version',
             style: TextStyle(
@@ -700,9 +716,45 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   }
 
   Future<void> _showPurchase(BuildContext context) async {
-    // TODO: Integrate with RevenueCat to show purchase
-    // For now, just complete onboarding
-    await _completeOnboarding();
+    setState(() => _isPurchasing = true);
+    
+    try {
+      final result = await PurchaseService.instance.purchasePremium();
+      
+      if (result.success) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('🎉 Thank you for going Premium!'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
+        await _completeOnboarding();
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(result.error ?? 'Purchase cancelled or unavailable'),
+              backgroundColor: Colors.orange,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Purchase failed: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isPurchasing = false);
+      }
+    }
   }
 
   Future<void> _completeOnboarding() async {
