@@ -4,12 +4,10 @@ import 'package:flutter/foundation.dart';
 /// These only work in debug builds — release builds always use false
 class DebugConfig {
   /// Force show onboarding even if already completed
-  static bool get forceOnboarding => kDebugMode && _forceOnboarding;
-  static const bool _forceOnboarding = false;
+  static const bool forceOnboarding = true;
   
   /// Force premium status (bypass purchase check)
-  static bool get fakePremium => kDebugMode && _fakePremium;
-  static const bool _fakePremium = false;
+  static const bool fakePremium = true;
   
   /// Skip onboarding entirely (go straight to home)
   static bool get skipOnboarding => kDebugMode && _skipOnboarding;
