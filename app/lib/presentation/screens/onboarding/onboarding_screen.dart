@@ -5,7 +5,6 @@ import 'package:permission_handler/permission_handler.dart';
 
 import '../../../core/constants/app_constants.dart';
 import '../../../core/providers/purchase_providers.dart';
-import '../../../core/services/notification_service.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../providers/app_providers.dart';
 import '../home/home_screen.dart';
@@ -614,7 +613,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
               borderRadius: BorderRadius.circular(14),
               child: InkWell(
                 onTap: () async {
-                  await Permission.camera.request();
+                  final status = await Permission.camera.request();
+                  debugPrint('Camera permission result: $status');
                   _pageController.nextPage(
                     duration: const Duration(milliseconds: 400),
                     curve: Curves.easeInOut,

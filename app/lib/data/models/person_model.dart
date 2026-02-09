@@ -1,3 +1,7 @@
+import 'dart:io';
+import 'package:path_provider/path_provider.dart';
+import 'package:path/path.dart' as p;
+
 class PersonModel {
   final String id;
   final String groupId;
@@ -6,6 +10,26 @@ class PersonModel {
   final String? notes;
   final DateTime createdAt;
   final DateTime updatedAt;
+
+  /// Cached documents directory for resolving relative paths.
+  static String? _docsDir;
+
+  /// Initialize the documents directory path. Call once at app startup.
+  static Future<void> initPhotoResolver() async {
+    final dir = await getApplicationDocumentsDirectory();
+    _docsDir = dir.path;
+  }
+
+  /// Resolve the stored photoPath to an absolute path.
+  /// Handles both legacy absolute paths and new relative paths.
+  String get resolvedPhotoPath {
+    if (p.isAbsolute(photoPath)) return photoPath;
+    if (_docsDir == null) return photoPath;
+    return p.join(_docsDir!, photoPath);
+  }
+
+  /// Get the photo as a File with the resolved path.
+  File get photoFile => File(resolvedPhotoPath);
 
   PersonModel({
     required this.id,

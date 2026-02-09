@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -347,7 +346,7 @@ class _QuizModeScreenState extends ConsumerState<QuizModeScreen> {
           child: ClipRRect(
             borderRadius: BorderRadius.circular(CardStyles.smallBorderRadius),
             child: Image.file(
-              File(_currentPerson!.photoPath),
+              _currentPerson!.photoFile,
               fit: BoxFit.cover,
               width: double.infinity,
               errorBuilder: (_, __, ___) => Container(
@@ -582,7 +581,7 @@ class _QuizModeScreenState extends ConsumerState<QuizModeScreen> {
                         ),
                         child: Chip(
                           avatar: CircleAvatar(
-                            backgroundImage: FileImage(File(person.photoPath)),
+                            backgroundImage: FileImage(person.photoFile),
                             onBackgroundImageError: (_, __) {},
                           ),
                           label: Text(person.name, style: const TextStyle(fontWeight: FontWeight.w600)),

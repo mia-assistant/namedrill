@@ -38,7 +38,7 @@ class _AddEditPersonScreenState extends ConsumerState<AddEditPersonScreen> {
     if (widget.person != null) {
       _nameController.text = widget.person!.name;
       _notesController.text = widget.person!.notes ?? '';
-      _photoPath = widget.person!.photoPath;
+      _photoPath = widget.person!.resolvedPhotoPath;
     }
   }
 

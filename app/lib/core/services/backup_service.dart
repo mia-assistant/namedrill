@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
 import '../../data/database/database_helper.dart';
@@ -24,11 +25,16 @@ class BackupService {
     final settingsData = await db.query(DatabaseHelper.tableSettings);
     
     // Encode photos as base64
+    final appDir = await getApplicationDocumentsDirectory();
     final photosMap = <String, String>{};
     for (final person in peopleData) {
       final photoPath = person['photoPath'] as String?;
       if (photoPath != null && photoPath.isNotEmpty) {
-        final photoFile = File(photoPath);
+        // Resolve relative paths
+        final resolved = p.isAbsolute(photoPath)
+            ? photoPath
+            : p.join(appDir.path, photoPath);
+        final photoFile = File(resolved);
         if (await photoFile.exists()) {
           final bytes = await photoFile.readAsBytes();
           photosMap[photoPath] = base64Encode(bytes);
@@ -50,7 +56,6 @@ class BackupService {
     };
     
     // Write to app documents directory
-    final appDir = await getApplicationDocumentsDirectory();
     final timestamp = DateTime.now().toIso8601String().replaceAll(':', '-').split('.').first;
     final backupFile = File('${appDir.path}/namedrill_backup_$timestamp.json');
     

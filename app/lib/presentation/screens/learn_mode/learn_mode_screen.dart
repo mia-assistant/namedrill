@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -356,7 +355,7 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen> {
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(CardStyles.smallBorderRadius - 2),
                         child: Image.file(
-                          File(card.person.photoPath),
+                          card.person.photoFile,
                           fit: BoxFit.cover,
                           width: double.infinity,
                           errorBuilder: (_, __, ___) => Container(
@@ -693,7 +692,7 @@ class _LearnModeScreenState extends ConsumerState<LearnModeScreen> {
                       ),
                         child: Chip(
                           avatar: CircleAvatar(
-                            backgroundImage: FileImage(File(person.photoPath)),
+                            backgroundImage: FileImage(person.photoFile),
                             onBackgroundImageError: (_, __) {},
                           ),
                           label: Text(person.name, style: const TextStyle(fontWeight: FontWeight.w600)),

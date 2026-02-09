@@ -107,7 +107,9 @@ class PersonRepository {
     );
   }
 
-  /// Save photo to app documents directory
+  /// Save photo to app documents directory.
+  /// Returns a **relative** path (e.g. "photos/<id>.jpg") so it survives
+  /// iOS container UUID changes between launches.
   Future<String> savePhoto(String tempPath, String personId) async {
     final directory = await getApplicationDocumentsDirectory();
     final photosDir = Directory(p.join(directory.path, 'photos'));
@@ -117,18 +119,25 @@ class PersonRepository {
     }
 
     final extension = p.extension(tempPath);
-    final newPath = p.join(photosDir.path, '$personId$extension');
+    final absolutePath = p.join(photosDir.path, '$personId$extension');
     
     // Copy the file to the permanent location
     final tempFile = File(tempPath);
-    await tempFile.copy(newPath);
+    await tempFile.copy(absolutePath);
 
-    return newPath;
+    // Store relative path from documents directory
+    return p.join('photos', '$personId$extension');
   }
 
   Future<void> _deletePhotoFile(String photoPath) async {
     try {
-      final file = File(photoPath);
+      // Resolve relative paths
+      String resolved = photoPath;
+      if (!p.isAbsolute(photoPath)) {
+        final dir = await getApplicationDocumentsDirectory();
+        resolved = p.join(dir.path, photoPath);
+      }
+      final file = File(resolved);
       if (await file.exists()) {
         await file.delete();
       }

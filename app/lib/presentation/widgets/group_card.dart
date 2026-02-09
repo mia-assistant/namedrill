@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -201,7 +200,7 @@ class GroupCard extends ConsumerWidget {
                   fit: StackFit.expand,
                   children: [
                     Image.file(
-                      File(person.photoPath),
+                      person.photoFile,
                       fit: BoxFit.cover,
                       errorBuilder: (_, __, ___) => Container(
                         color: Theme.of(context).colorScheme.surfaceContainerHighest,

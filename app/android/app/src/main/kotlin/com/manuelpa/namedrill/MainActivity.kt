@@ -1,4 +1,4 @@
-package com.namedrill.namedrill
+package com.manuelpa.namedrill
 
 import io.flutter.embedding.android.FlutterActivity
 

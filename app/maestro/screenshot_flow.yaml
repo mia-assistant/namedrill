@@ -1,4 +1,4 @@
-appId: com.namedrill.namedrill
+appId: com.manuelpa.namedrill
 ---
 # NameDrill - Screenshot Capture Flow
 # 
@@ -9,7 +9,7 @@ appId: com.namedrill.namedrill
 # Run with: ~/.maestro/bin/maestro test maestro/screenshot_flow.yaml
 #
 # Note: We use clearState: false because the app seeds data on startup in SCREENSHOT_MODE.
-# If the data is wrong, uninstall the app first: adb uninstall com.namedrill.namedrill
+# If the data is wrong, uninstall the app first: adb uninstall com.manuelpa.namedrill
 #
 # Screenshots saved to: ~/.maestro/tests/<timestamp>/ (default location)
 # Copy them to app/store_listing/screenshots/ after the run

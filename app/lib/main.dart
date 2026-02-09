@@ -8,6 +8,7 @@ import 'core/services/notification_service.dart';
 import 'core/theme/app_theme.dart';
 import 'core/constants/app_constants.dart';
 import 'core/utils/test_data_seeder.dart';
+import 'data/models/person_model.dart';
 import 'data/models/settings_model.dart';
 import 'presentation/providers/app_providers.dart';
 import 'presentation/screens/home/home_screen.dart';
@@ -35,6 +36,9 @@ void main() async {
 
   // Initialize notification service
   await NotificationService.instance.init();
+
+  // Initialize photo path resolver for container-safe paths
+  await PersonModel.initPhotoResolver();
 
   // Check if onboarding is complete
   final prefs = await SharedPreferences.getInstance();
@@ -113,7 +117,6 @@ class NameDrillApp extends ConsumerWidget {
         themeMode = ThemeMode.dark;
         break;
       case DarkModeOption.system:
-      default:
         themeMode = ThemeMode.system;
     }
 

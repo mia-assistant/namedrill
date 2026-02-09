@@ -2,7 +2,7 @@
 # Setup test data for NameDrill Learn Mode tests
 # Run this before running learn_mode_flow.yaml
 
-PACKAGE="com.namedrill.namedrill"
+PACKAGE="com.manuelpa.namedrill"
 DB_PATH="/data/data/$PACKAGE/databases/namedrill.db"
 PHOTOS_DIR="/data/data/$PACKAGE/app_flutter/photos"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
