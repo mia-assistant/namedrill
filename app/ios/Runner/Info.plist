@@ -47,5 +47,11 @@
 		<true/>
 		<key>UIStatusBarHidden</key>
 		<false/>
+		<key>NSCameraUsageDescription</key>
+		<string>NameDrill needs camera access to take photos of people you want to remember.</string>
+		<key>NSPhotoLibraryUsageDescription</key>
+		<string>NameDrill needs photo library access to import photos of people you want to remember.</string>
+		<key>ITSAppUsesNonExemptEncryption</key>
+		<false/>
 	</dict>
 </plist>

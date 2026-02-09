@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 import '../../core/config/debug_config.dart';
 import '../../core/providers/purchase_providers.dart';
+import '../../core/services/notification_service.dart';
 import '../../data/models/models.dart';
 import '../../data/repositories/repositories.dart';
 
@@ -203,11 +204,28 @@ class SettingsNotifier extends StateNotifier<AsyncValue<SettingsModel>> {
 
   Future<void> setNotifications(bool enabled, {int? hour, int? minute}) async {
     final current = state.value ?? SettingsModel();
+    final updatedHour = hour ?? current.notificationHour;
+    final updatedMinute = minute ?? current.notificationMinute;
+
     await updateSettings(current.copyWith(
       notificationsEnabled: enabled,
-      notificationHour: hour,
-      notificationMinute: minute,
+      notificationHour: updatedHour,
+      notificationMinute: updatedMinute,
     ));
+
+    // Schedule or cancel the daily reminder
+    final notifService = NotificationService.instance;
+    if (enabled) {
+      final hasPermission = await notifService.requestPermission();
+      if (hasPermission) {
+        await notifService.scheduleDailyReminder(
+          hour: updatedHour,
+          minute: updatedMinute,
+        );
+      }
+    } else {
+      await notifService.cancelAllReminders();
+    }
   }
 
   Future<void> setSessionCardCount(int count) async {
@@ -224,12 +242,12 @@ class SettingsNotifier extends StateNotifier<AsyncValue<SettingsModel>> {
   }
 }
 
-// Premium status (convenience) - combines RevenueCat status with local settings
+// Premium status (convenience) - combines store status with local settings
 final isPremiumProvider = Provider<bool>((ref) {
   // Debug override
   if (DebugConfig.fakePremium) return true;
   
-  // Check RevenueCat status first (source of truth)
+  // Check store purchase status first (source of truth)
   final purchaseState = ref.watch(purchaseStateProvider);
   if (purchaseState.isPremium) return true;
   

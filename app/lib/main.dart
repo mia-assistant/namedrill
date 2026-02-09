@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'core/config/debug_config.dart';
-import 'core/services/purchase_service.dart';
+import 'core/services/notification_service.dart';
 import 'core/theme/app_theme.dart';
 import 'core/constants/app_constants.dart';
 import 'core/utils/test_data_seeder.dart';
@@ -33,8 +33,8 @@ void main() async {
     DeviceOrientation.portraitDown,
   ]);
 
-  // Initialize RevenueCat for in-app purchases
-  await PurchaseService.instance.initialize();
+  // Initialize notification service
+  await NotificationService.instance.init();
 
   // Check if onboarding is complete
   final prefs = await SharedPreferences.getInstance();

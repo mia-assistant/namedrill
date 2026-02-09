@@ -32,7 +32,7 @@ class SettingsScreen extends ConsumerWidget {
   }
 
   Widget _buildContent(BuildContext context, WidgetRef ref, SettingsModel settings, PurchaseState purchaseState) {
-    // Use RevenueCat premium status as primary source, fall back to local settings
+    // Use store purchase status as primary source, fall back to local settings
     final isPremium = purchaseState.isPremium || settings.isPremium;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     

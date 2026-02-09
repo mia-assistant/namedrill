@@ -1,182 +1,188 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:flutter/foundation.dart';
-import 'package:purchases_flutter/purchases_flutter.dart';
+import 'package:in_app_purchase/in_app_purchase.dart';
 
-/// RevenueCat In-App Purchase Service for NameDrill
-/// 
-/// ## Setup Instructions:
-/// 
-/// 1. Create a RevenueCat account at https://app.revenuecat.com
-/// 
-/// 2. Create a new project in RevenueCat dashboard
-/// 
-/// 3. Configure your app stores:
-///    - **App Store Connect**: Create an in-app purchase product with ID 'namedrill_premium'
-///      (non-consumable, $4.99). Add the App Store shared secret to RevenueCat.
-///    - **Google Play Console**: Create an in-app product with ID 'namedrill_premium'
-///      (one-time purchase, $4.99). Link your Google Play service credentials.
-/// 
-/// 4. In RevenueCat dashboard:
-///    - Create a Product: 'namedrill_premium' (map to both stores)
-///    - Create an Entitlement: 'premium' 
-///    - Create an Offering: 'default' containing the premium product
-/// 
-/// 5. Get your API keys from RevenueCat > Project Settings > API Keys:
-///    - Copy the Apple API Key (for iOS)
-///    - Copy the Google API Key (for Android)
-/// 
-/// 6. Replace the placeholder keys below with your actual keys
-
+/// Native In-App Purchase Service for NameDrill
+///
+/// Uses the official `in_app_purchase` plugin for direct
+/// App Store / Google Play integration.
+///
+/// Product IDs:
+///   iOS:     namedrill_premium
+///   Android: namedrill_premium
 class PurchaseService {
-  // ==========================================================================
-  // IMPORTANT: Replace these with your actual RevenueCat API keys
-  // Get them from: RevenueCat Dashboard > Project Settings > API Keys
-  // ==========================================================================
-  static const String _appleApiKey = 'YOUR_REVENUECAT_APPLE_API_KEY';
-  static const String _googleApiKey = 'YOUR_REVENUECAT_GOOGLE_API_KEY';
-  
-  /// The entitlement ID configured in RevenueCat dashboard
-  static const String _premiumEntitlementId = 'premium';
-  
-  /// The product ID for the premium one-time purchase
-  static const String premiumProductId = 'namedrill_premium';
+  // ---------------------------------------------------------------------------
+  // Product identifiers
+  // ---------------------------------------------------------------------------
+  static const String _iosProductId = 'namedrill_premium';
+  static const String _androidProductId = 'namedrill_premium';
 
+  static String get productId =>
+      Platform.isIOS ? _iosProductId : _androidProductId;
+
+  // ---------------------------------------------------------------------------
+  // Singleton
+  // ---------------------------------------------------------------------------
   static PurchaseService? _instance;
   static PurchaseService get instance => _instance ??= PurchaseService._();
-  
+
   PurchaseService._();
 
+  // ---------------------------------------------------------------------------
+  // Internal state
+  // ---------------------------------------------------------------------------
+  final InAppPurchase _iap = InAppPurchase.instance;
+  StreamSubscription<List<PurchaseDetails>>? _subscription;
   bool _isInitialized = false;
-  CustomerInfo? _customerInfo;
-  
-  /// Stream controller for purchase state changes
+  bool _isAvailable = false;
+
+  ProductDetails? _productDetails;
+  bool _isPremium = false;
+
+  /// Stream of premium-status changes
   final _purchaseStateController = StreamController<bool>.broadcast();
-  
-  /// Stream of premium status changes
   Stream<bool> get premiumStatusStream => _purchaseStateController.stream;
 
-  /// Initialize RevenueCat SDK
-  /// Call this early in app startup (e.g., in main.dart)
+  // ---------------------------------------------------------------------------
+  // Initialisation
+  // ---------------------------------------------------------------------------
   Future<void> initialize() async {
     if (_isInitialized) return;
-    
+
     try {
-      // Configure RevenueCat based on platform
-      late PurchasesConfiguration configuration;
-      
-      if (defaultTargetPlatform == TargetPlatform.iOS || 
-          defaultTargetPlatform == TargetPlatform.macOS) {
-        configuration = PurchasesConfiguration(_appleApiKey);
-      } else if (defaultTargetPlatform == TargetPlatform.android) {
-        configuration = PurchasesConfiguration(_googleApiKey);
-      } else {
-        debugPrint('PurchaseService: Unsupported platform');
+      _isAvailable = await _iap.isAvailable();
+      if (!_isAvailable) {
+        debugPrint('PurchaseService: Store not available');
+        _isInitialized = true;
         return;
       }
-      
-      await Purchases.configure(configuration);
-      
-      // Listen for customer info updates
-      Purchases.addCustomerInfoUpdateListener((customerInfo) {
-        _customerInfo = customerInfo;
-        _purchaseStateController.add(isPremiumFromInfo(customerInfo));
-      });
-      
-      // Get initial customer info
-      _customerInfo = await Purchases.getCustomerInfo();
-      
+
+      // Listen for purchase updates
+      _subscription = _iap.purchaseStream.listen(
+        _handlePurchaseUpdates,
+        onDone: () => _subscription?.cancel(),
+        onError: (error) =>
+            debugPrint('PurchaseService: purchaseStream error – $error'),
+      );
+
+      // Query the product
+      final response = await _iap.queryProductDetails({productId});
+      if (response.productDetails.isNotEmpty) {
+        _productDetails = response.productDetails.first;
+        debugPrint(
+            'PurchaseService: Found product ${_productDetails!.id} – ${_productDetails!.price}');
+      } else {
+        debugPrint(
+            'PurchaseService: Product not found. Errors: ${response.error}');
+      }
+
+      // Restore past purchases so we know current status
+      await _iap.restorePurchases();
+
       _isInitialized = true;
       debugPrint('PurchaseService: Initialized successfully');
     } catch (e) {
-      debugPrint('PurchaseService: Failed to initialize - $e');
+      debugPrint('PurchaseService: Failed to initialize – $e');
+      _isInitialized = true; // avoid retrying infinitely
     }
   }
 
-  /// Check if user has premium entitlement from CustomerInfo
-  bool isPremiumFromInfo(CustomerInfo customerInfo) {
-    return customerInfo.entitlements.active.containsKey(_premiumEntitlementId);
-  }
-
-  /// Check if user currently has premium access
-  Future<bool> isPremium() async {
-    if (!_isInitialized) {
-      await initialize();
-    }
-    
-    try {
-      final customerInfo = await Purchases.getCustomerInfo();
-      _customerInfo = customerInfo;
-      return isPremiumFromInfo(customerInfo);
-    } catch (e) {
-      debugPrint('PurchaseService: Error checking premium status - $e');
-      // Fall back to cached info if available
-      if (_customerInfo != null) {
-        return isPremiumFromInfo(_customerInfo!);
-      }
-      return false;
+  // ---------------------------------------------------------------------------
+  // Purchase stream handler
+  // ---------------------------------------------------------------------------
+  void _handlePurchaseUpdates(List<PurchaseDetails> purchases) {
+    for (final purchase in purchases) {
+      _handlePurchase(purchase);
     }
   }
 
-  /// Get the current offerings (products available for purchase)
-  Future<Offerings?> getOfferings() async {
-    if (!_isInitialized) {
-      await initialize();
+  Future<void> _handlePurchase(PurchaseDetails purchase) async {
+    if (purchase.productID != productId) return;
+
+    switch (purchase.status) {
+      case PurchaseStatus.purchased:
+      case PurchaseStatus.restored:
+        _isPremium = true;
+        _purchaseStateController.add(true);
+        debugPrint(
+            'PurchaseService: Premium ${purchase.status == PurchaseStatus.restored ? "restored" : "purchased"}');
+        break;
+
+      case PurchaseStatus.error:
+        debugPrint(
+            'PurchaseService: Purchase error – ${purchase.error?.message}');
+        break;
+
+      case PurchaseStatus.pending:
+        debugPrint('PurchaseService: Purchase pending…');
+        break;
+
+      case PurchaseStatus.canceled:
+        debugPrint('PurchaseService: Purchase cancelled');
+        break;
     }
-    
-    try {
-      return await Purchases.getOfferings();
-    } catch (e) {
-      debugPrint('PurchaseService: Error getting offerings - $e');
-      return null;
+
+    // Complete the purchase so the store is happy
+    if (purchase.pendingCompletePurchase) {
+      await _iap.completePurchase(purchase);
     }
   }
 
-  /// Get the premium package from the default offering
-  Future<Package?> getPremiumPackage() async {
-    final offerings = await getOfferings();
-    
-    if (offerings == null || offerings.current == null) {
-      debugPrint('PurchaseService: No current offering available');
-      return null;
-    }
-    
-    // Try to find the lifetime/premium package
-    return offerings.current!.lifetime ?? 
-           offerings.current!.availablePackages.firstOrNull;
+  // ---------------------------------------------------------------------------
+  // Public API
+  // ---------------------------------------------------------------------------
+
+  /// Whether the store reported premium ownership
+  bool get isPremium => _isPremium;
+
+  /// Check freshest status (re-queries restore)
+  Future<bool> checkPremium() async {
+    if (!_isInitialized) await initialize();
+    await _iap.restorePurchases();
+    // Give the stream a tick to process
+    await Future.delayed(const Duration(milliseconds: 500));
+    return _isPremium;
   }
 
-  /// Purchase the premium product
-  /// Returns true if purchase was successful, false otherwise
+  /// Get the formatted price string for display
+  String get priceString => _productDetails?.price ?? '\$4.99';
+
+  /// Purchase the premium product.
   Future<PurchaseOperationResult> purchasePremium() async {
-    if (!_isInitialized) {
-      await initialize();
+    if (!_isInitialized) await initialize();
+
+    if (!_isAvailable) {
+      return PurchaseOperationResult(
+        success: false,
+        error: 'Store is not available on this device.',
+      );
     }
-    
+
+    if (_productDetails == null) {
+      return PurchaseOperationResult(
+        success: false,
+        error: 'Premium product not found. Please try again later.',
+      );
+    }
+
     try {
-      final package = await getPremiumPackage();
-      
-      if (package == null) {
+      final purchaseParam = PurchaseParam(productDetails: _productDetails!);
+      // Non-consumable purchase
+      final started =
+          await _iap.buyNonConsumable(purchaseParam: purchaseParam);
+
+      if (!started) {
         return PurchaseOperationResult(
           success: false,
-          error: 'Premium package not available. Please try again later.',
+          error: 'Could not initiate purchase. Please try again.',
         );
       }
-      
-      final result = await Purchases.purchasePackage(package);
-      final customerInfo = result.customerInfo;
-      _customerInfo = customerInfo;
-      
-      final isPremium = isPremiumFromInfo(customerInfo);
-      _purchaseStateController.add(isPremium);
-      
-      return PurchaseOperationResult(
-        success: isPremium,
-        error: isPremium ? null : 'Purchase completed but premium not activated.',
-      );
-    } on PurchasesErrorCode catch (e) {
-      return _handlePurchaseError(e);
+
+      // Wait for the purchase stream to deliver a result (timeout 60 s)
+      return await _waitForPurchaseResult();
     } catch (e) {
-      debugPrint('PurchaseService: Purchase error - $e');
+      debugPrint('PurchaseService: Purchase error – $e');
       return PurchaseOperationResult(
         success: false,
         error: 'An unexpected error occurred. Please try again.',
@@ -184,21 +190,25 @@ class PurchaseService {
     }
   }
 
-  /// Restore previous purchases
-  /// Returns true if premium was restored, false otherwise
+  /// Restore previous purchases.
   Future<PurchaseOperationResult> restorePurchases() async {
-    if (!_isInitialized) {
-      await initialize();
+    if (!_isInitialized) await initialize();
+
+    if (!_isAvailable) {
+      return PurchaseOperationResult(
+        success: false,
+        error: 'Store is not available on this device.',
+      );
     }
-    
+
     try {
-      final customerInfo = await Purchases.restorePurchases();
-      _customerInfo = customerInfo;
-      
-      final isPremium = isPremiumFromInfo(customerInfo);
-      _purchaseStateController.add(isPremium);
-      
-      if (isPremium) {
+      _isPremium = false; // reset before checking
+      await _iap.restorePurchases();
+
+      // Give the stream time to process restored purchases
+      await Future.delayed(const Duration(seconds: 2));
+
+      if (_isPremium) {
         return PurchaseOperationResult(
           success: true,
           message: 'Premium restored successfully!',
@@ -209,10 +219,8 @@ class PurchaseService {
           error: 'No previous purchases found.',
         );
       }
-    } on PurchasesErrorCode catch (e) {
-      return _handlePurchaseError(e);
     } catch (e) {
-      debugPrint('PurchaseService: Restore error - $e');
+      debugPrint('PurchaseService: Restore error – $e');
       return PurchaseOperationResult(
         success: false,
         error: 'Failed to restore purchases. Please try again.',
@@ -222,45 +230,69 @@ class PurchaseService {
 
   /// Get formatted price string for display
   Future<String> getPremiumPrice() async {
-    final package = await getPremiumPackage();
-    return package?.storeProduct.priceString ?? '\$4.99';
+    if (!_isInitialized) await initialize();
+    return priceString;
   }
 
-  PurchaseOperationResult _handlePurchaseError(PurchasesErrorCode errorCode) {
-    String message;
-    
-    switch (errorCode) {
-      case PurchasesErrorCode.purchaseCancelledError:
-        message = 'Purchase was cancelled.';
-        break;
-      case PurchasesErrorCode.storeProblemError:
-        message = 'There was a problem with the app store. Please try again.';
-        break;
-      case PurchasesErrorCode.purchaseNotAllowedError:
-        message = 'Purchases are not allowed on this device.';
-        break;
-      case PurchasesErrorCode.purchaseInvalidError:
-        message = 'The purchase was invalid. Please try again.';
-        break;
-      case PurchasesErrorCode.productNotAvailableForPurchaseError:
-        message = 'This product is not available for purchase.';
-        break;
-      case PurchasesErrorCode.productAlreadyPurchasedError:
-        message = 'You already own this product. Try restoring purchases.';
-        break;
-      case PurchasesErrorCode.networkError:
-        message = 'Network error. Please check your connection and try again.';
-        break;
-      default:
-        message = 'An error occurred. Please try again.';
-    }
-    
-    debugPrint('PurchaseService: Error code $errorCode - $message');
-    return PurchaseOperationResult(success: false, error: message);
+  // ---------------------------------------------------------------------------
+  // Helpers
+  // ---------------------------------------------------------------------------
+
+  /// Waits up to 60 s for the purchase stream to emit a result.
+  Future<PurchaseOperationResult> _waitForPurchaseResult() async {
+    final completer = Completer<PurchaseOperationResult>();
+    late StreamSubscription<List<PurchaseDetails>> sub;
+
+    sub = _iap.purchaseStream.listen((purchases) {
+      for (final p in purchases) {
+        if (p.productID != productId) continue;
+
+        if (p.status == PurchaseStatus.purchased) {
+          if (!completer.isCompleted) {
+            completer.complete(PurchaseOperationResult(
+              success: true,
+              message: 'Premium unlocked! Thank you!',
+            ));
+          }
+          sub.cancel();
+        } else if (p.status == PurchaseStatus.error) {
+          if (!completer.isCompleted) {
+            completer.complete(PurchaseOperationResult(
+              success: false,
+              error: p.error?.message ?? 'Purchase failed.',
+            ));
+          }
+          sub.cancel();
+        } else if (p.status == PurchaseStatus.canceled) {
+          if (!completer.isCompleted) {
+            completer.complete(PurchaseOperationResult(
+              success: false,
+              error: 'Purchase was cancelled.',
+            ));
+          }
+          sub.cancel();
+        }
+      }
+    });
+
+    // Timeout after 60 seconds
+    Future.delayed(const Duration(seconds: 60), () {
+      if (!completer.isCompleted) {
+        completer.complete(PurchaseOperationResult(
+          success: false,
+          error:
+              'Purchase timed out. If you were charged, try Restore Purchase.',
+        ));
+        sub.cancel();
+      }
+    });
+
+    return completer.future;
   }
 
   /// Clean up resources
   void dispose() {
+    _subscription?.cancel();
     _purchaseStateController.close();
   }
 }

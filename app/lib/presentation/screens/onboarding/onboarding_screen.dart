@@ -5,7 +5,7 @@ import 'package:permission_handler/permission_handler.dart';
 
 import '../../../core/constants/app_constants.dart';
 import '../../../core/providers/purchase_providers.dart';
-import '../../../core/services/purchase_service.dart';
+import '../../../core/services/notification_service.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../providers/app_providers.dart';
 import '../home/home_screen.dart';
@@ -719,9 +719,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     setState(() => _isPurchasing = true);
     
     try {
-      final result = await PurchaseService.instance.purchasePremium();
+      final success = await ref.read(purchaseStateProvider.notifier).purchasePremium();
       
-      if (result.success) {
+      if (success) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
@@ -733,9 +733,10 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         await _completeOnboarding();
       } else {
         if (mounted) {
+          final purchaseState = ref.read(purchaseStateProvider);
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(result.error ?? 'Purchase cancelled or unavailable'),
+              content: Text(purchaseState.errorMessage ?? 'Purchase cancelled or unavailable'),
               backgroundColor: Colors.orange,
             ),
           );
@@ -761,9 +762,13 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(AppConstants.prefOnboardingComplete, true);
     
-    // Save reminder preference
+    // Save reminder preference and schedule notification
     if (_remindersEnabled) {
-      // TODO: Schedule notifications
+      await ref.read(settingsProvider.notifier).setNotifications(
+            true,
+            hour: _reminderTime.hour,
+            minute: _reminderTime.minute,
+          );
     }
 
     if (mounted) {

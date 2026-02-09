@@ -76,7 +76,7 @@ class PurchaseStateNotifier extends StateNotifier<PurchaseState> {
       });
       
       // Check initial premium status
-      final isPremium = await purchaseService.isPremium();
+      final isPremium = purchaseService.isPremium;
       final price = await purchaseService.getPremiumPrice();
       
       state = state.copyWith(
@@ -92,10 +92,10 @@ class PurchaseStateNotifier extends StateNotifier<PurchaseState> {
     }
   }
 
-  /// Refresh premium status from RevenueCat
+  /// Refresh premium status
   Future<void> refreshPremiumStatus() async {
     final purchaseService = _ref.read(purchaseServiceProvider);
-    final isPremium = await purchaseService.isPremium();
+    final isPremium = await purchaseService.checkPremium();
     state = state.copyWith(isPremium: isPremium);
   }
 
@@ -169,9 +169,8 @@ class PurchaseStateNotifier extends StateNotifier<PurchaseState> {
   }
 }
 
-/// Convenience provider for checking if user is premium
-/// This combines RevenueCat status with local settings for reliability
-final isPremiumRevenueCatProvider = Provider<bool>((ref) {
+/// Convenience provider for checking if user is premium from store
+final isPremiumStoreProvider = Provider<bool>((ref) {
   final purchaseState = ref.watch(purchaseStateProvider);
   return purchaseState.isPremium;
 });
