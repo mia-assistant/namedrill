@@ -1,4 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- In-App Billing permission -->
+    <uses-permission android:name="com.android.vending.BILLING" />
+    
     <!-- Camera and photo library permissions -->
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />

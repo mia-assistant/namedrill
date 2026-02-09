@@ -147,7 +147,7 @@ class PurchaseService {
 
   /// Purchase the premium product
   /// Returns true if purchase was successful, false otherwise
-  Future<PurchaseResult> purchasePremium() async {
+  Future<PurchaseOperationResult> purchasePremium() async {
     if (!_isInitialized) {
       await initialize();
     }
@@ -156,19 +156,20 @@ class PurchaseService {
       final package = await getPremiumPackage();
       
       if (package == null) {
-        return PurchaseResult(
+        return PurchaseOperationResult(
           success: false,
           error: 'Premium package not available. Please try again later.',
         );
       }
       
-      final customerInfo = await Purchases.purchasePackage(package);
+      final result = await Purchases.purchasePackage(package);
+      final customerInfo = result.customerInfo;
       _customerInfo = customerInfo;
       
       final isPremium = isPremiumFromInfo(customerInfo);
       _purchaseStateController.add(isPremium);
       
-      return PurchaseResult(
+      return PurchaseOperationResult(
         success: isPremium,
         error: isPremium ? null : 'Purchase completed but premium not activated.',
       );
@@ -176,7 +177,7 @@ class PurchaseService {
       return _handlePurchaseError(e);
     } catch (e) {
       debugPrint('PurchaseService: Purchase error - $e');
-      return PurchaseResult(
+      return PurchaseOperationResult(
         success: false,
         error: 'An unexpected error occurred. Please try again.',
       );
@@ -185,7 +186,7 @@ class PurchaseService {
 
   /// Restore previous purchases
   /// Returns true if premium was restored, false otherwise
-  Future<PurchaseResult> restorePurchases() async {
+  Future<PurchaseOperationResult> restorePurchases() async {
     if (!_isInitialized) {
       await initialize();
     }
@@ -198,12 +199,12 @@ class PurchaseService {
       _purchaseStateController.add(isPremium);
       
       if (isPremium) {
-        return PurchaseResult(
+        return PurchaseOperationResult(
           success: true,
           message: 'Premium restored successfully!',
         );
       } else {
-        return PurchaseResult(
+        return PurchaseOperationResult(
           success: false,
           error: 'No previous purchases found.',
         );
@@ -212,7 +213,7 @@ class PurchaseService {
       return _handlePurchaseError(e);
     } catch (e) {
       debugPrint('PurchaseService: Restore error - $e');
-      return PurchaseResult(
+      return PurchaseOperationResult(
         success: false,
         error: 'Failed to restore purchases. Please try again.',
       );
@@ -225,7 +226,7 @@ class PurchaseService {
     return package?.storeProduct.priceString ?? '\$4.99';
   }
 
-  PurchaseResult _handlePurchaseError(PurchasesErrorCode errorCode) {
+  PurchaseOperationResult _handlePurchaseError(PurchasesErrorCode errorCode) {
     String message;
     
     switch (errorCode) {
@@ -255,7 +256,7 @@ class PurchaseService {
     }
     
     debugPrint('PurchaseService: Error code $errorCode - $message');
-    return PurchaseResult(success: false, error: message);
+    return PurchaseOperationResult(success: false, error: message);
   }
 
   /// Clean up resources
@@ -265,12 +266,12 @@ class PurchaseService {
 }
 
 /// Result of a purchase or restore operation
-class PurchaseResult {
+class PurchaseOperationResult {
   final bool success;
   final String? error;
   final String? message;
 
-  PurchaseResult({
+  PurchaseOperationResult({
     required this.success,
     this.error,
     this.message,
