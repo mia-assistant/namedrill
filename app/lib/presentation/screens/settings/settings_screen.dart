@@ -441,7 +441,9 @@ class SettingsScreen extends ConsumerWidget {
                                 ),
                               )
                             : Text(
-                                'Unlock for ${purchaseState.priceString}',
+                                purchaseState.priceString.isNotEmpty 
+                                    ? 'Unlock for ${purchaseState.priceString}'
+                                    : 'Unlock Premium',
                                 style: const TextStyle(
                                   fontWeight: FontWeight.w800,
                                   fontSize: 16,

@@ -28,7 +28,7 @@ class PurchaseState {
     this.status = PurchaseStatus.idle,
     this.errorMessage,
     this.successMessage,
-    this.priceString = '\$4.99',
+    this.priceString = '',
     this.isInitialized = false,
   });
 

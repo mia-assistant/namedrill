@@ -416,7 +416,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
   Widget _buildPaywallPage(BuildContext context) {
     final purchaseState = ref.watch(purchaseStateProvider);
-    final priceString = purchaseState.priceString ?? '\$4.99';
+    final priceString = purchaseState.priceString.isNotEmpty ? purchaseState.priceString : null;
     
     return Padding(
       padding: const EdgeInsets.all(32),
@@ -475,7 +475,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             child: Column(
               children: [
                 Text(
-                  priceString,
+                  priceString ?? 'Premium',
                   style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                         color: const Color(0xFF1A1A1A),
                         fontWeight: FontWeight.w800,
@@ -483,7 +483,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'One-time payment',
+                  priceString != null ? 'One-time payment' : 'One-time purchase',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         color: const Color(0xFF1A1A1A).withOpacity(0.7),
                       ),
@@ -654,7 +654,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
   Widget _buildPaywallButtons(BuildContext context) {
     final purchaseState = ref.watch(purchaseStateProvider);
-    final priceString = purchaseState.priceString ?? '\$4.99';
+    final priceString = purchaseState.priceString.isNotEmpty ? purchaseState.priceString : null;
+    final buttonText = priceString != null ? 'Unlock Premium — $priceString' : 'Unlock Premium';
     
     return Column(
       children: [
@@ -687,7 +688,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                           ),
                         )
                       : Text(
-                          'Unlock Premium — $priceString',
+                          buttonText,
                           style: const TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.w700,

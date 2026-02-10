@@ -146,7 +146,7 @@ class PurchaseService {
   }
 
   /// Get the formatted price string for display
-  String get priceString => _productDetails?.price ?? '\$4.99';
+  String get priceString => _productDetails?.price ?? '';
 
   /// Purchase the premium product.
   Future<PurchaseOperationResult> purchasePremium() async {
